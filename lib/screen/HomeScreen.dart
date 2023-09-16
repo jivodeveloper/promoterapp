@@ -5,17 +5,11 @@ import 'package:promoterapp/config/Common.dart';
 import 'package:promoterapp/screen/Attendance.dart';
 import 'package:promoterapp/screen/Dashboard.dart';
 import 'dart:async';
-import 'dart:ui';
-import 'package:flutter/services.dart';
 import 'package:promoterapp/screen/SalesEntry.dart';
 import 'package:promoterapp/screen/SalesReport.dart';
-import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
 
 class HomeScreen extends StatefulWidget{
-
-  // String personName="";
-  // HomeScreen({required this.personName});
 
   @override
   State<StatefulWidget> createState() {
@@ -32,8 +26,6 @@ class HomeScreenState extends State<HomeScreen>{
 
   @override
   void initState() {
-
-    getuserdetails('Userdetails');
 
     Future.delayed(const Duration(seconds: 10), () {
       setState(() {
@@ -69,7 +61,7 @@ class HomeScreenState extends State<HomeScreen>{
               )
             ],
           ),
-    );
+      );
 
   }
 
@@ -79,13 +71,16 @@ class HomeScreenState extends State<HomeScreen>{
 
         child: Scaffold(
           body: [
+
             Dashboard(),
             Attendance(),
-            SalesEntry(),
             SalesReport()
+
           ]
           [currentIndex],
           bottomNavigationBar: BottomNavigationBar(
+            selectedItemColor: app_theme,
+            unselectedItemColor: Colors.grey,
             onTap: (index) {
               setState(() {
                 currentIndex = index;
@@ -94,13 +89,32 @@ class HomeScreenState extends State<HomeScreen>{
             currentIndex: currentIndex,
             items: const [
 
-              BottomNavigationBarItem(icon: Icon(Icons.home,color: app_theme), label: "Home"),
+              BottomNavigationBarItem(icon: Icon(Icons.home,color: app_theme), label: 'Home'),
               BottomNavigationBarItem(icon: Icon(Icons.person,color: app_theme), label: "Attendance"),
-              BottomNavigationBarItem(icon: Icon(Icons.report,color: app_theme), label: "Sales"),
-              BottomNavigationBarItem(icon: Icon(Icons.point_of_sale_sharp,color: app_theme), label:"Reports"),
+              // BottomNavigationBarItem(icon: Icon(Icons.report,color: app_theme), label: "Sales"),
+              BottomNavigationBarItem(icon: Icon(Icons.report,color: app_theme), label:"Reports"),
 
             ],
           ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: Colors.green,
+            onPressed: () {
+              setState(() {
+
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            SalesEntry()));
+
+              });
+            },
+            child: Icon(Icons.add),
+
+
+          ),
+
         ),
         onWillPop: () async {
           logout(context);

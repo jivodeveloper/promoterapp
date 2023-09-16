@@ -17,11 +17,10 @@ class MyWidgetState extends State<MyWidget>{
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
         width: double.infinity,
-        margin: const EdgeInsets.only(right: 5),
-        padding: const EdgeInsets.only(left: 5, right: 5),
+        margin: const EdgeInsets.only(left: 10, right: 10,top: 10),
+        padding: const EdgeInsets.only(left: 5, right: 5,top: 5),
         decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(
                 Radius.circular(10.0)
@@ -47,13 +46,12 @@ class MyWidgetState extends State<MyWidget>{
                       Flexible(
                         flex:1,
                         child:TextFormField(
+                          keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-
                               hintText: 'Pieces'
                           ),
                         ),
                       )
-
 
                     ],
                   )
@@ -62,7 +60,6 @@ class MyWidgetState extends State<MyWidget>{
             ]
         )
     );
-
   }
 
 }

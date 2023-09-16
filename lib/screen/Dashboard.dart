@@ -2,6 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:promoterapp/config/Color.dart';
 import 'package:intl/intl.dart';
+import 'package:promoterapp/screen/LoginScreen.dart';
+import 'package:promoterapp/util/ApiHelper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Dashboard extends StatefulWidget{
 
@@ -19,16 +22,43 @@ class Dashboardstate extends State<Dashboard>{
   @override
   void initState() {
     super.initState();
+    getuserdetails('Userdetails');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+          automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
-          title: const Text("Dashboard",
-              style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400)
-          )
+          title: Container(
+            child: Row(
+              children: [
+
+                Expanded(
+                  flex:1,
+                  child:Image.asset('assets/Images/jivo_logo.png',width: 40,height: 40,),
+                ),
+
+                Expanded(
+                  flex:12,
+                  child: const Text("  Dashboard", style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400,fontSize: 21)),
+                )
+
+              ],
+            )
+          ),
+          actions: [
+
+            IconButton(
+              icon: Image.asset(
+               'assets/Images/logout.png', height:40, width:25),
+              onPressed: () {
+                logout(context);
+              },
+            )
+
+          ],
       ),
       body:Column(
         children: [
@@ -113,8 +143,7 @@ class Dashboardstate extends State<Dashboard>{
                   flex: 1,
                   child: Container(
 
-                    margin: const EdgeInsets.only(
-                        left: 5, right: 10),
+                    margin: const EdgeInsets.only(left: 5, right: 10),
                     width: double.infinity,
                     height: 55,
                     decoration: BoxDecoration(
@@ -142,5 +171,39 @@ class Dashboardstate extends State<Dashboard>{
      );
    }
 
+  void logout(BuildContext ctx) {
+
+    showDialog(
+      context: ctx,
+      builder: (BuildContext context) =>
+          AlertDialog(
+            content: const Text('Logout'),
+            actions: <TextButton>[
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () async {
+
+                  SharedPreferences preferences = await SharedPreferences.getInstance();
+                  await preferences.clear();
+
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              LoginScreen()));
+
+                },
+                child: const Text('Yes'),
+              )
+            ],
+          ),
+    );
+
+  }
 
 }

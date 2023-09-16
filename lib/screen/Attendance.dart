@@ -1,8 +1,9 @@
-import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:promoterapp/models/Shops.dart';
 import 'package:promoterapp/screen/Dashboard.dart';
+import 'package:promoterapp/screen/SalesEntry.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/functionhelper.dart';
 import '../config/Common.dart';
@@ -27,14 +28,15 @@ class AttendanceState extends State<Attendance>{
   String attStatus="";
   bool _isLoading = false;
   get progress => null;
+  List<Shops> shopdata = [];
 
   @override
   void initState() {
     super.initState();
 
+    getCurrentPosition(context);
     getAttendanceStatus();
     getallbeat('GetShopsData').then((value) => allbeatlist(value));
-    getAttendanceStatus();
 
   }
 
@@ -60,26 +62,28 @@ class AttendanceState extends State<Attendance>{
 
     }else{
 
-      for(int i=0 ;i<value.length;i++){
+      shopdata = value;
 
-        if(value[i].retailerName != ""){
-          print("length${value.length}");
-          setState(() {
-
-            beatnamelist.add(value[i].retailerName.toString());
-            beatIdlist.add(value[i].retailerID!.toInt());
-
-          });
-
-
-
-        }
-
-      }
-
-      beatnamelist = LinkedHashSet<String>.from(beatnamelist).toList();
-
-      beatIdlist = LinkedHashSet<int>.from(beatIdlist).toList();
+      // for(int i=0 ;i<value.length;i++){
+      //
+      //   if(value[i].retailerName != ""){
+      //
+      //     print("length${value.length}");
+      //
+      //     setState(() {
+      //
+      //       beatnamelist.add(value[i].retailerName.toString());
+      //       beatIdlist.add(value[i].retailerID!.toInt());
+      //
+      //     });
+      //
+      //   }
+      //
+      // }
+      //
+      // beatnamelist = LinkedHashSet<String>.from(beatnamelist).toList();
+      //
+      // beatIdlist = LinkedHashSet<int>.from(beatIdlist).toList();
 
     }
 
@@ -130,14 +134,16 @@ class AttendanceState extends State<Attendance>{
                                     GestureDetector(
                                       onTap: (){
 
-                                       showdilaog("P",context,beatnamelist,beatIdlist);
+                                       //showdialog("P",context,beatnamelist,beatIdlist);
+                                         showdialogg("P",context, shopdata);
+
                                       },
                                       child:Container(
                                         height: 100,
                                         width: 100,
                                         margin: EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color:  pr ? Colors.grey : const Color(0xff0e0e0e),
+                                          color:  pr ? const Color(0xff0e0e0e) : Colors.grey,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: const Center(
@@ -151,15 +157,20 @@ class AttendanceState extends State<Attendance>{
                                     ),
 
                                     GestureDetector(
+
                                       onTap: (){
-                                       showdilaog("EOD",context,beatnamelist,beatIdlist);
+
+                                        showdialogg("EOD",context, shopdata);
+
+                                       // showdialogg("EOD",context,beatnamelist,beatIdlist);
                                       },
+
                                       child:  Container(
                                         height: 100,
                                         width: 100,
                                         margin: EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: eod ? Colors.grey : const Color(0xff0e0e0e),
+                                          color: eod ? const Color(0xff0e0e0e):Colors.grey,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: const Center(
@@ -169,6 +180,7 @@ class AttendanceState extends State<Attendance>{
                                             )
                                         ),
                                       ),
+
                                     ),
 
                                   ],
@@ -181,18 +193,19 @@ class AttendanceState extends State<Attendance>{
 
                                     GestureDetector(
                                       onTap: (){
-                                       showdilaog("HD",context,beatnamelist,beatIdlist);
+                                        showdialogg("NOON",context,shopdata);
                                       },
+
                                       child: Container(
                                         height: 100,
                                         width: 100,
                                         margin: EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: hd ? Colors.grey : const Color(0xff0e0e0e),
+                                          color: hd ?  const Color(0xff0e0e0e) : Colors.grey,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: const Center(
-                                            child: Text("HALF DAY",style: TextStyle(
+                                            child: Text("MID DAY",style: TextStyle(
                                                 color: Colors.white
                                             ),
                                             )
@@ -202,14 +215,14 @@ class AttendanceState extends State<Attendance>{
 
                                     GestureDetector(
                                       onTap: (){
-                                       showdilaog("WO",context,beatnamelist,beatIdlist);
+                                        showdialogg("WO",context,shopdata);
                                       },
                                       child:Container(
                                         height: 100,
                                         width: 100,
                                         margin: EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color: wo ? Colors.grey : const Color(0xff0e0e0e),
+                                          color: wo ?  const Color(0xff0e0e0e):Colors.grey,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: const Center(
@@ -231,7 +244,7 @@ class AttendanceState extends State<Attendance>{
                     )
                 )
             )
-       ),
+        ),
         onWillPop: () {
 
           Navigator.push(
@@ -429,3 +442,4 @@ class AttendanceState extends State<Attendance>{
   // }
 
 }
+

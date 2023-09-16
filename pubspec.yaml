@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
@@ -57,7 +56,8 @@ dev_dependencies:
   geolocator: ^9.0.2
   image_picker: ^1.0.2
   latlong2: ^0.9.0
-
+  geocoding: ^2.1.0
+  path_provider: ^2.0.15
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -73,6 +73,7 @@ flutter:
   assets:
     - assets/Images/jivo_logo.png
     - assets/Images/Calender.png
+    - assets/Images/logout.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

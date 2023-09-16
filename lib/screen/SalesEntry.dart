@@ -1,11 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:promoterapp/config/Common.dart';
 import 'package:promoterapp/models/Item.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:promoterapp/screen/MyWidget.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
+import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:promoterapp/util/functionhelper.dart';
+import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 
 class SalesEntry  extends StatefulWidget{
 
@@ -36,7 +37,7 @@ class SalesEntryState extends State<SalesEntry>{
               backgroundColor: Colors.white,
               leading: GestureDetector(
                 onTap: (){
-
+                  dynamicList.clear();
                   Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -50,99 +51,114 @@ class SalesEntryState extends State<SalesEntry>{
                   style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400)
               )
           ),
-          body: Container(
+          body: ProgressHUD(
+            child:Builder(
+              builder:(ctx)=>
+                Scaffold(
+                    body: Container(
 
-              child: Column(
-                 children: [
+                        child: Column(
+                          children: [
 
-                  Container(
-                      height: 50,
-                      color: Colors.black12,
-                      child: Row(
-                        children: [
+                            Container(
+                              height: 50,
+                              color: Colors.black12,
+                              child: Row(
+                                children: [
 
-                          Expanded(
-                              flex: 1,
-                              child:GestureDetector(
+                                  Expanded(
+                                      flex: 1,
+                                      child:GestureDetector(
 
-                                onTap: (){
+                                        onTap: (){
 
-                                  getSKU('GetShopsItemData').then((value) => {
-                                    SKUlist(value,context)
-                                  });
-                                },
+                                          final progress = ProgressHUD.of(ctx);
+                                          progress?.show();
 
-                                child: Container(
-                                  color: Colors.black12,
-                                  child:const Center(
-                                    child:Text("+",style: TextStyle(
-                                        fontSize: 25
-                                     ),
-                                    ),
+                                          getSKU('GetShopsItemData').then((value) => {
+
+                                            SKUlist(value,context,progress)
+
+                                          });
+
+                                        },
+
+                                        child: Container(
+
+                                          child:const Center(
+                                            child:Text("+",style: TextStyle(
+                                                fontSize: 25
+                                            ),
+                                            ),
+                                          ),
+                                        ),
+
+                                      )
                                   ),
-                                ),
 
-                              )
-                          ),
+                                  Expanded(
+                                      child:GestureDetector(
 
-                          Expanded(
-                              child:GestureDetector(
+                                        onTap: (){
+                                          getdate(context).then((value) => {
+                                            setState((){
+                                              dt =value;
+                                            })
+                                          });
+                                        },
 
-                                onTap: (){
-                                  getdate(context).then((value) => {
-                                    setState((){
-                                      dt =value;
-                                    })
-                                  });
-                                },
+                                        child: Container(
+                                          child: Center(
+                                            child: Text(dt == ""?"Date" :dt,style: TextStyle(fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
 
-                                child: Container(
-                                  child: Center(
-                                    child: Text(dt == ""?"Date" :dt,style: TextStyle(fontSize: 16),
-                                    ),
+                                      )
                                   ),
-                                ),
 
-                              )
-                          ),
+                                  Expanded(
+                                      flex: 1,
+                                      child: GestureDetector(
+                                        onTap: (){
 
-                          Expanded(
-                              flex: 1,
-                              child: GestureDetector(
-                                onTap: (){
-
-                                },
-                                child: Container(
-                                  child: Center(
-                                    child: Text("SAVE",style: TextStyle(
-                                        fontSize: 16
-                                    ),),
+                                        },
+                                        child: Container(
+                                          child: Center(
+                                            child: Text("SAVE",style: TextStyle(
+                                                fontSize: 16
+                                            ),),
+                                          ),
+                                        ),
+                                      )
                                   ),
-                                ),
-                              )
-                          ),
 
-                        ],
-                     ),
-                  ),
+                                ],
+                              ),
+                            ),
 
-                  Expanded(
-                     child: ListView.builder(
-                         shrinkWrap: true,
-                         itemCount: dynamicList.length,
-                         itemBuilder: (_, index) =>
-                         dynamicList[index]
-                     ),
-                   ),
+                            Expanded(
+                              child: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: dynamicList.length,
+                                  itemBuilder: (_, index) =>
+                                  dynamicList[index]
+                              ),
+                            ),
 
-                ],
-              )
-            ),
+                          ],
+                        )
+                    ),
+                ),
+            )
+          )
         ),
     );
   }
 
-  void SKUlist(value,context){
+  void SKUlist(value,context, progress){
+
+    progress.dismiss();
 
     List<Item> itemdata = [];
     itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
@@ -161,38 +177,82 @@ class SalesEntryState extends State<SalesEntry>{
 
   }
 
-  void addwidget(skUlist) async{
+  void savesave(){
 
-    //setState(() {
-    dynamicList.add(MyWidget(skUlist));
-    //});
+    int userid = SharedPrefClass.getInt(USER_ID);
+
+    // var salesentry=[{
+    //   "personId":userid,
+    //   "shopId":widget.retailerId,
+    //   "timeStamp":getcurrentdate(),
+    //   "itemId":widget.status,
+    //   "itemPieces":_currentPosition?.latitude,
+    //   "itemQuantity":_currentPosition?.longitude,
+    //   "latitude":_batteryLevel,
+    //   "longitude":isturnedon,
+    //   "battery":_currentPosition?.accuracy,
+    //   "GpsEnabled":_currentPosition?.speed,
+    //   "accuracy":_currentPosition?.provider,
+    //   "speed":_currentPosition?.altitude,
+    //   "provider":shoptype,
+    //   "altitude":"secondary",
+    // }];
+    //
+    // var body = json.encode(salesentry);
 
   }
 
-  void savesave(){
+  void addwidget(skUlist) async{
 
-    var salesentry=[{
-      "personId":userid,
-      "shopId":widget.retailerId,
-      "timeStamp":cdate,
-      "itemId":widget.status,
-      "itemPieces":_currentPosition?.latitude,
-      "itemQuantity":_currentPosition?.longitude,
-      "latitude":_batteryLevel,
-      "longitude":isturnedon,
-      "battery":_currentPosition?.accuracy,
-      "GpsEnabled":_currentPosition?.speed,
-      "accuracy":_currentPosition?.provider,
-      "speed":_currentPosition?.altitude,
-      "provider":shoptype,
-      "altitude":"secondary",
-    }];
+    setState(() {
+      dynamicList.add(MyWidget(skUlist));
+    });
 
-    var body = json.encode(salesentry);
+  }
+
+  Future<void> showskudialog(context, List SKUlist,List SKUid) async {
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        context = context;
+        return AlertDialog(
+          title: const Text('Select SKU'),
+          content:ListView.builder(
+              shrinkWrap: true,
+              itemCount: SKUlist.length,
+              itemBuilder: (context,i){
+                return GestureDetector(
+
+                    onTap: (){
+
+                      Navigator.pop(context);
+                      addwidget(SKUlist[i]);
+                    },
+
+                    child: Container(
+                      padding:const EdgeInsets.all(10),
+                      child: Text("${SKUlist[i]}"),
+                    )
+
+                );
+              }
+          ),
+        );
+      },
+    );
 
   }
 
 }
+
+
+
+
+
+
+
 
 
 

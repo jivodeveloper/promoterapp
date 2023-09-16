@@ -39,4 +39,13 @@ class SharedPrefClass {
     return p.setString(key, value)?? Future.value(false);
   }
 
+  static Future<bool> setDouble(String key, double value) async {
+    final p = await _instance;
+    return p.setDouble(key, value)?? Future.value(false);
+  }
+
+  static double getDouble(String key) {
+    return _prefs_instance?.getDouble(key) ?? 0.0;
+  }
+
 }

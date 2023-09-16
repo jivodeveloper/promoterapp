@@ -44,6 +44,7 @@ Future<logindetails> login(context, String user,String pass) async {
             SharedPrefClass.setString(PERSON_TYPE, details.personType.toString());
             SharedPrefClass.setString(PERSON_NAME, details.personName.toString());
             SharedPrefClass.setString(GROUP, details.group.toString());
+            SharedPrefClass.setString(DISTANCE_ALLOWED, details.distanceAllowed.toString());
 
             Navigator.push(
               context,
@@ -152,8 +153,8 @@ Future<void> markattendance(String status, String beatid,BuildContext context,Fi
   var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}AddSalesPersonAttendance'));
   request.fields['personId']= userid.toString();
   request.fields['status']= status;
-  request.fields['latitude']= "28.632548449315053";
-  request.fields['longitude']= "77.12857905397074";
+  request.fields['latitude']= SharedPrefClass.getDouble(latitude).toString();
+  request.fields['longitude']= SharedPrefClass.getDouble(longitude).toString();
   request.files.add(await http.MultipartFile.fromPath('image', file.path));
 
   var response = await request.send();
@@ -234,9 +235,9 @@ void getuserdetails(String endpoint) async {
 
     details = logindetails.fromJson(json.decode(response.body));
 
-    SharedPrefClass.setString(ATT_STATUS,details.attStatus.toString()).then((value) => print("get value $value"));
-    // SharedPrefClass.setInt(DISTANCE_ALLOWED,details.distanceAllowed!.toInt());
-    // SharedPrefClass.setInt(USER_ID, details.personId);
+    SharedPrefClass.setString(ATT_STATUS,details.attStatus.toString());
+    SharedPrefClass.setInt(DISTANCE_ALLOWED,details.distanceAllowed!.toInt());
+    SharedPrefClass.setInt(USER_ID, details.personId);
     SharedPrefClass.setString(PERSON_TYPE, details.personType.toString());
     SharedPrefClass.setString(PERSON_NAME, details.personName.toString());
     SharedPrefClass.setString(GROUP, details.group.toString());
@@ -266,7 +267,7 @@ Future<void> savepromotersale(String salesEntry,File file,BuildContext context) 
   int userid=0;
   userid = SharedPrefClass.getInt(USER_ID);
 
-  var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}AddSalesPersonAttendance'));
+  var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales'));
   request.fields['salesEntry']= userid.toString();
   request.files.add(await http.MultipartFile.fromPath('image', file.path));
 
@@ -303,7 +304,7 @@ Future<void> savepromotersale(String salesEntry,File file,BuildContext context) 
         backgroundColor: Colors.black,
         textColor: Colors.white,
         fontSize: 16.0);
-
+    
   }
 
 }

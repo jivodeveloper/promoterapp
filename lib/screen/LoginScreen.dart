@@ -55,15 +55,6 @@ class LoginScreenState extends State<LoginScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
 
-                                  // Container(
-                                  //   margin: EdgeInsets.only(bottom: 0),
-                                  //   child: Align(
-                                  //       alignment: Alignment.centerLeft,
-                                  //       child: Image.asset(
-                                  //           'assets/Images/logo.png', height: 150)
-                                  //   ),
-                                  // ),
-
                                   Container(
                                     margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
                                     child: Column(
