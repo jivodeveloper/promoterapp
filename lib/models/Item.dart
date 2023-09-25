@@ -72,23 +72,9 @@ class Item {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['itemID'] = this.itemID;
     data['itemName'] = this.itemName;
-    data['itemCode'] = this.itemCode;
     data['quantity'] = this.quantity;
-    data['status'] = this.status;
-    data['mrp'] = this.mrp;
     data['piecesPerCase'] = this.piecesPerCase;
-    data['UOMId'] = this.uOMId;
-    data['typeNameId'] = this.typeNameId;
-    data['visibleToSO'] = this.visibleToSO;
-    data['visibleToPromoter'] = this.visibleToPromoter;
     data['itemTypeId'] = this.itemTypeId;
-    data['isScheme'] = this.isScheme;
-    data['gst'] = this.gst;
-    data['hsnCode'] = this.hsnCode;
-    data['isCashback'] = this.isCashback;
-    data['isVisibleToRetailer'] = this.isVisibleToRetailer;
-    data['isRedeemable'] = this.isRedeemable;
-    data['Boxes'] = this.boxes;
     data['options'] = this.options;
     return data;
   }

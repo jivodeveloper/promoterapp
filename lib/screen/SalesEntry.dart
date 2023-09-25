@@ -4,9 +4,12 @@ import 'package:promoterapp/models/Item.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:promoterapp/screen/MyWidget.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
+import 'package:promoterapp/util/DatabaseHelper.dart';
+import 'package:promoterapp/util/Networkconnectivity.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:promoterapp/util/functionhelper.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class SalesEntry  extends StatefulWidget{
 
@@ -23,7 +26,9 @@ class SalesEntryState extends State<SalesEntry>{
 
   String dt = "";
   List itemlist = [],itemid=[];
-
+  final DatabaseHelper dbManager = new DatabaseHelper();
+  final connectivityResult = Connectivity().checkConnectivity();
+  NetworkConnectivity networkConnectivity =NetworkConnectivity();
   @override
   void initState() {
     super.initState();
@@ -75,11 +80,22 @@ class SalesEntryState extends State<SalesEntry>{
                                           final progress = ProgressHUD.of(ctx);
                                           progress?.show();
 
-                                          getSKU('GetShopsItemData').then((value) => {
+                                           if(connectivityResult==ConnectivityResult.none){
+                                             print("list size online$connectivityResult");
 
-                                            SKUlist(value,context,progress)
+                                             getSKU('GetShopsItemData').then((value) => {
 
-                                          });
+                                               SKUlist(value,context,progress)
+
+                                             });
+
+                                           }else{
+                                             print("list size offline$connectivityResult");
+                                             var list = [];
+
+                                             showskudialog(context,itemlist,itemid);
+
+                                           }
 
                                         },
 
@@ -156,13 +172,16 @@ class SalesEntryState extends State<SalesEntry>{
     );
   }
 
-  void SKUlist(value,context, progress){
+  Future<void> SKUlist(value,context, progress) async {
 
     progress.dismiss();
 
     List<Item> itemdata = [];
     itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
 
+    int? id = await dbManager.insertdata(itemdata);
+
+    print("id value $id");
     itemlist.clear();
     itemid.clear();
 
@@ -219,26 +238,33 @@ class SalesEntryState extends State<SalesEntry>{
         context = context;
         return AlertDialog(
           title: const Text('Select SKU'),
-          content:ListView.builder(
-              shrinkWrap: true,
-              itemCount: SKUlist.length,
-              itemBuilder: (context,i){
-                return GestureDetector(
+          content:FutureBuilder<String>(
+            future: networkConnectivity.checkConnectivity(),
+            builder: (context,snapshot) {
+              if(snapshot.hasData){
+                ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: snapshot.data?.length,
+                    itemBuilder: (context,i){
+                      return GestureDetector(
 
-                    onTap: (){
+                          onTap: (){
 
-                      Navigator.pop(context);
-                      addwidget(SKUlist[i]);
-                    },
+                            Navigator.pop(context);
+                            addwidget(snapshot.data?[i].);
+                          },
 
-                    child: Container(
-                      padding:const EdgeInsets.all(10),
-                      child: Text("${SKUlist[i]}"),
-                    )
+                          child: Container(
+                            padding:const EdgeInsets.all(10),
+                            child: Text("${SKUlist[i]}"),
+                          )
 
+                      );
+                    }
                 );
               }
-          ),
+            },
+          )
         );
       },
     );

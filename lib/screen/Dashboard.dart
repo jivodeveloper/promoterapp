@@ -4,7 +4,10 @@ import 'package:promoterapp/config/Color.dart';
 import 'package:intl/intl.dart';
 import 'package:promoterapp/screen/LoginScreen.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
+import 'package:promoterapp/util/DatabaseHelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:promoterapp/models/Item.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Dashboard extends StatefulWidget{
 
@@ -18,11 +21,39 @@ class Dashboard extends StatefulWidget{
 class Dashboardstate extends State<Dashboard>{
 
   TextEditingController dateController = TextEditingController();
+  final DatabaseHelper dbManager = new DatabaseHelper();
 
   @override
   void initState() {
     super.initState();
+
     getuserdetails('Userdetails');
+
+    getSKU('GetShopsItemData').then((value) => {
+      savelocaldb(value)
+    });
+
+  }
+
+  Future<void> savelocaldb(value) async {
+
+    List<Item> itemdata = [];
+    itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
+
+    int? id = await dbManager.insertdata(itemdata);
+
+    if(id>0){
+          //
+          // Fluttertoast.showToast(msg: "",
+          //     toastLength: Toast.LENGTH_SHORT,
+          //     gravity: ToastGravity.BOTTOM,
+          //     timeInSecForIosWeb: 1,
+          //     backgroundColor: Colors.black,
+          //     textColor: Colors.white,
+          //     fontSize: 16.0);
+          //
+    }
+
   }
 
   @override
