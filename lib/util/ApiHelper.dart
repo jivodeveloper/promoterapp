@@ -67,11 +67,11 @@ Future<logindetails> login(context, String user,String pass) async {
 
           }
 
-        } catch (e) {
+          } catch (e) {
 
-          //print("distanceallowed$e");
+            //print("distanceallowed$e");
 
-        }
+          }
 
         Fluttertoast.showToast(
             msg: "Successfully logged in",
@@ -133,7 +133,6 @@ Future<dynamic> getallbeat(String endpoint) async{
 
   int userid=0;
   userid = SharedPrefClass.getInt(USER_ID);
-
   var response = await http.get(Uri.parse('$IP_URL$endpoint?id=$userid'));
   final list = jsonDecode(response.body);
 
@@ -147,7 +146,6 @@ Future<dynamic> getallbeat(String endpoint) async{
 Future<void> markattendance(String status, String beatid,BuildContext context,File file) async {
 
   int userid=0;
-
   userid = SharedPrefClass.getInt(USER_ID);
 
   var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}AddSalesPersonAttendance'));
@@ -165,7 +163,7 @@ Future<void> markattendance(String status, String beatid,BuildContext context,Fi
 
     if(responsedData.contains("DONE")){
 
-      pr = true;
+      present = true;
       wo = true;
 
     }
@@ -177,7 +175,7 @@ Future<void> markattendance(String status, String beatid,BuildContext context,Fi
         backgroundColor: Colors.black,
         textColor: Colors.white,
         fontSize: 16.0);
-        
+
        Navigator.push(
         context,
         MaterialPageRoute(
@@ -257,7 +255,6 @@ Future<dynamic> getSKU(String endpoint) async{
 
   var response = await http.get(Uri.parse('$IP_URL$endpoint?id=$userid'));
   final list = jsonDecode(response.body);
-
   return list;
 
 }
@@ -308,4 +305,3 @@ Future<void> savepromotersale(String salesEntry,File file,BuildContext context) 
   }
 
 }
-

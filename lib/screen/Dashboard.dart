@@ -7,7 +7,6 @@ import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/DatabaseHelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:promoterapp/models/Item.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class Dashboard extends StatefulWidget{
 
@@ -41,18 +40,6 @@ class Dashboardstate extends State<Dashboard>{
     itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
 
     int? id = await dbManager.insertdata(itemdata);
-
-    if(id>0){
-          //
-          // Fluttertoast.showToast(msg: "",
-          //     toastLength: Toast.LENGTH_SHORT,
-          //     gravity: ToastGravity.BOTTOM,
-          //     timeInSecForIosWeb: 1,
-          //     backgroundColor: Colors.black,
-          //     textColor: Colors.white,
-          //     fontSize: 16.0);
-          //
-    }
 
   }
 
@@ -238,3 +225,4 @@ class Dashboardstate extends State<Dashboard>{
   }
 
 }
+

@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:promoterapp/models/Shops.dart';
-import 'package:promoterapp/screen/Dashboard.dart';
-import 'package:promoterapp/screen/SalesEntry.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/functionhelper.dart';
 import '../config/Common.dart';
@@ -44,6 +42,16 @@ class AttendanceState extends State<Attendance>{
 
     if(value.length == 0){
 
+      Future.delayed(Duration(seconds: 3), () {
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    HomeScreen()));
+
+      });
+
       Fluttertoast.showToast(msg: "You don't have any beat! \n Please contact admin",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
@@ -51,14 +59,6 @@ class AttendanceState extends State<Attendance>{
           backgroundColor: Colors.black,
           textColor: Colors.white,
           fontSize: 16.0);
-
-      Future.delayed(Duration(seconds: 3), () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    Dashboard()));
-      });
 
     }else{
 
@@ -132,18 +132,25 @@ class AttendanceState extends State<Attendance>{
                                   children:[
 
                                     GestureDetector(
-                                      onTap: (){
+                                      onTap: penabled? (){
 
-                                       //showdialog("P",context,beatnamelist,beatIdlist);
-                                         showdialogg("P",context, shopdata);
+                                        final progress  = ProgressHUD.of(context);
+                                        progress?.show();
 
-                                      },
+                                      // showdialog("P",context,beatnamelist,beatIdlist);
+                                         showdialogg("P",context,shopdata);
+
+                                         if(present==true){
+
+                                         }
+
+                                      }:null,
                                       child:Container(
                                         height: 100,
                                         width: 100,
                                         margin: EdgeInsets.all(10),
                                         decoration: BoxDecoration(
-                                          color:  pr ? const Color(0xff0e0e0e) : Colors.grey,
+                                          color:  present ? const Color(0xff0e0e0e) : Colors.grey,
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: const Center(
@@ -158,12 +165,12 @@ class AttendanceState extends State<Attendance>{
 
                                     GestureDetector(
 
-                                      onTap: (){
+                                      onTap: eodenabled?(){
 
                                         showdialogg("EOD",context, shopdata);
 
                                        // showdialogg("EOD",context,beatnamelist,beatIdlist);
-                                      },
+                                      }:null,
 
                                       child:  Container(
                                         height: 100,
@@ -192,9 +199,9 @@ class AttendanceState extends State<Attendance>{
                                   children:[
 
                                     GestureDetector(
-                                      onTap: (){
+                                      onTap: hdenabled?(){
                                         showdialogg("NOON",context,shopdata);
-                                      },
+                                      }:null,
 
                                       child: Container(
                                         height: 100,
@@ -214,9 +221,9 @@ class AttendanceState extends State<Attendance>{
                                     ),
 
                                     GestureDetector(
-                                      onTap: (){
+                                      onTap:woenabled? (){
                                         showdialogg("WO",context,shopdata);
-                                      },
+                                      }:null,
                                       child:Container(
                                         height: 100,
                                         width: 100,

@@ -4,15 +4,19 @@ import 'package:sqflite/sqflite.dart' as sql;
 class DatabaseHelper {
 
   static Future<void> createTables(sql.Database database) async {
-    await database.execute("""CREATE TABLE SKU(
-        itemID INTEGER,
-        itemName TEXT,
-        quantity TEXT,
-        piecesPerCase INTEGER,
-        itemTypeId INTEGER,
-        options TEXT
-      )
-      """);
+
+    // await database.execute("""CREATE TABLE SKU(
+    //     itemID INTEGER,
+    //     itemName TEXT,
+    //     quantity TEXT,
+    //     piecesPerCase INTEGER,
+    //     itemTypeId INTEGER,
+    //     options TEXT
+    //   )
+    //   """);
+    await database.execute("CREATE TABLE SKU(itemID INTEGER,itemName TEXT,quantity TEXT,piecesPerCase INTEGER,itemTypeId INTEGER,options TEXT,imageurl TEXT)");
+    await database.execute("CREATE TABLE SAVESALES(id INTEGER PRIMARY KEY AUTOINCREMENT,jsondata TEXT)");
+
   }
 
   static Future<sql.Database> db() async {
@@ -35,6 +39,24 @@ class DatabaseHelper {
     }
 
      return id;
+  }
+
+  Future<int> savesaledata(String json) async {
+    int id=0;
+    try{
+
+      final db = await DatabaseHelper.db();
+      id = await db.insert('SAVESALES',{'jsondata': json});
+      print("id value $id");
+
+    }catch(e){
+
+      print("id value $e");
+
+    }
+
+
+    return id;
   }
 
   static Future<List<Map<String, dynamic>>> getItems() async {

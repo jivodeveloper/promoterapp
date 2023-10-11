@@ -19,31 +19,16 @@ class Item {
   bool? isVisibleToRetailer;
   bool? isRedeemable;
   num? boxes;
+  String? imageurl;
 
   Item(
       {this.itemID,
         this.itemName,
-        this.itemCode,
         this.quantity,
-
-        this.status,
-        this.mrp,
         this.piecesPerCase,
-
-        this.uOMId,
-
-        this.typeNameId,
-        this.options,
-        this.visibleToSO,
-        this.visibleToPromoter,
         this.itemTypeId,
-        this.isScheme,
-        this.gst,
-        this.hsnCode,
-        this.isCashback,
-        this.isVisibleToRetailer,
-        this.isRedeemable,
-        this.boxes,
+        this.options,
+        this.imageurl
      });
 
   Item.fromJson(Map<String, dynamic> json) {
@@ -66,7 +51,9 @@ class Item {
     isVisibleToRetailer = json['isVisibleToRetailer'];
     isRedeemable = json['isRedeemable'];
     options = json['options'];
+    imageurl = json['imageURL'];
   }
+
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
@@ -76,6 +63,7 @@ class Item {
     data['piecesPerCase'] = this.piecesPerCase;
     data['itemTypeId'] = this.itemTypeId;
     data['options'] = this.options;
+    data['imageurl'] = this.imageurl;
     return data;
   }
 }

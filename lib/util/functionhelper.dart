@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:promoterapp/config/Common.dart';
 import 'package:promoterapp/models/Shops.dart';
-import 'package:promoterapp/screen/MyWidget.dart';
-import 'package:promoterapp/screen/SalesEntry.dart';
+import 'package:battery_plus/battery_plus.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -20,152 +19,97 @@ void getAttendanceStatus() async {
   String attStatus="";
 
   attStatus = SharedPrefClass.getString(ATT_STATUS);
+
   if(attStatus==""){
 
-    pr = true;
-    eod = false;
-    wo = true;
-    hd = true;
+    penabled = true;
+    woenabled = true;
+    eodenabled =false;
+    hdenabled =false;
 
   }else if(attStatus=="P"){
 
-    pr = false;
+    penabled = false;
+    woenabled =false;
+    present = false;
     wo = false;
-    eod = true;
-    hd = true ;
 
   }else if(attStatus=="EOD"){
 
-    pr = false;
+    penabled = false;
+    woenabled =false;
+    eodenabled =false;
+    hdenabled =false;
+    present = false;
     eod = false;
     wo = false;
     hd = false;
 
-  }else if(attStatus=="NOON"){
+  }else if(attStatus=="HD")
+  {
 
-    pr = false;
-    eod = true;
-    wo = false;
-    hd = false;
-
-  }else if(attStatus=="WO"){
-
-    pr = false;
+    penabled = false;
+    woenabled =false;
+    eodenabled =false;
+    hdenabled =false;
+    present = false;
     eod = false;
     wo = false;
     hd = false;
 
   }
 
+  // if(attStatus==""){
+  //
+  //   pr = true;
+  //   eod = false;
+  //   wo = true;
+  //   hd = true;
+  //
+  // }else if(attStatus=="P"){
+  //
+  //   pr = false;
+  //   wo = false;
+  //   eod = true;
+  //   hd = true;
+  //
+  // }else if(attStatus=="EOD"){
+  //
+  //   pr = false;
+  //   eod = false;
+  //   wo = false;
+  //   hd = false;
+  //
+  // }else if(attStatus=="NOON"){
+  //
+  //   pr = false;
+  //   eod = true;
+  //   wo = false;
+  //   hd = false;
+  //
+  // }else if(attStatus=="WO"){
+  //
+  //   pr = false;
+  //   eod = false;
+  //   wo = false;
+  //   hd = false;
+  //
+  // }
+
 }
 
-// Future<void> showdialog(String status,context, List beatnamelist,List beatIdlist) async {
-//
-//   return showDialog(
-//       context: context,
-//       builder:(BuildContext context) {
-//         return AlertDialog(
-//           title: const Text('Attendance'),
-//           content: const Text('Are you really present?'),
-//           actions: <Widget>[
-//             TextButton(
-//               onPressed: () => Navigator.pop(context, 'Cancel'),
-//               child: const Text('No'),
-//             ),
-//             TextButton(
-//               onPressed: () =>
-//                   gettodaysbeat(status,context,beatnamelist,beatIdlist),
-//               child: const Text('Yes'),
-//             ),
-//           ],
-//         );
-//       }
-//    );
-//
-// }
-//
-//
-// Future<void> showbeat(String status,BuildContext contextt, List beatnamelist, List beatIdlist) async {
-//
-//   if(beatnamelist.length == 0){
-//
-//     Navigator.pop(contextt);
-//
-//     Fluttertoast.showToast(msg: "You don't have any beat! \n Please contact admin",
-//         toastLength: Toast.LENGTH_SHORT,
-//         gravity: ToastGravity.BOTTOM,
-//         timeInSecForIosWeb: 1,
-//         backgroundColor: Colors.black,
-//         textColor: Colors.white,
-//         fontSize: 16.0);
-//
-//   }else{
-//
-//     Navigator.pop(contextt);
-//
-//     return showDialog<void>(
-//       context: contextt,
-//       barrierDismissible: false,
-//       builder: (BuildContext context) {
-//         contextt = context;
-//         return AlertDialog(
-//           title: const Text('Select Shop'),
-//           content:ListView.builder(
-//               shrinkWrap: true,
-//               itemCount: beatnamelist.length,
-//               itemBuilder: (context,i){
-//                 return GestureDetector(
-//                     onTap: (){
-//                       Navigator.pop(contextt);
-//
-//                       if(getdistance('','',beatnamelist[i],'')){
-//
-//                         selectFromCamera(status,beatnamelist[i].toString(),contextt);
-//
-//                       }else{
-//
-//                         Fluttertoast.showToast(msg: "Too far from store!",
-//                             toastLength: Toast.LENGTH_SHORT,
-//                             gravity: ToastGravity.BOTTOM,
-//                             timeInSecForIosWeb: 1,
-//                             backgroundColor: Colors.black,
-//                             textColor: Colors.white,
-//                             fontSize: 16.0);
-//                       }
-//
-//
-//                     },
-//                     child: Container(
-//                       padding:EdgeInsets.all(10),
-//                       child: Text("${beatnamelist[i]}"),
-//                     )
-//                 );
-//               }
-//           ),
-//         );
-//       },
-//     );
-//
-//   }
-//
-// }
-//
-// Future<void> gettodaysbeat(status,context, List beatnamelist,List beatIdlist) async {
-//
-//   print("value of list $beatnamelist");
-//   int beatId = (SharedPrefClass.getInt(BEAT_ID)==0 ? -1 : SharedPrefClass.getInt(BEAT_ID));
-//
-//   if(beatId==0 || beatId ==-1){
-//
-//     showbeat(status,context,beatnamelist,beatIdlist);
-//
-//   }else{
-//
-//     markattendance(status,beatId.toString(),context,"" as File);
-//
-//   }
-//
-// }
+Future<bool> checkNetwork() async {
+  bool isConnected = false;
+  try {
+    final result = await InternetAddress.lookup('google.com');
+    if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+      isConnected = true;
+    }
+  } on SocketException catch (_) {
+    isConnected = false;
+  }
+  return isConnected;
+}
 
 Future<void> showdialogg(String status,context, List<Shops> listdata) async {
 
@@ -182,8 +126,7 @@ Future<void> showdialogg(String status,context, List<Shops> listdata) async {
             ),
             TextButton(
               onPressed: () =>
-                  // gettodaysbeat(status,context,beatnamelist,beatIdlist),
-
+              // gettodaysbeat(status,context,beatnamelist,beatIdlist)
               gettodaysbeatt(status,context,listdata),
               child: const Text('Yes'),
             ),
@@ -194,13 +137,11 @@ Future<void> showdialogg(String status,context, List<Shops> listdata) async {
 
 }
 
-Future<void> gettodaysbeatt(status,context, List<Shops> beatnamelist) async {
+Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist) async {
 
-  print("value of list $beatnamelist");
   int beatId = (SharedPrefClass.getInt(BEAT_ID)==0 ? -1 : SharedPrefClass.getInt(BEAT_ID));
 
   if(beatId==0 || beatId ==-1){
-
    // showbeat(status,context,beatnamelist,beatIdlist);
     showbeatt(status,context,beatnamelist);
   }else{
@@ -242,8 +183,9 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
               itemBuilder: (context,i){
                 return GestureDetector(
                     onTap: (){
+
                       Navigator.pop(contextt);
-                      print("${SharedPrefClass.getDouble(latitude)}");
+
                       if(SharedPrefClass.getDouble(latitude)==0.0){
 
                         Fluttertoast.showToast(msg: "Please check your connection!",
@@ -255,9 +197,12 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
                             fontSize: 16.0);
 
                       }else{
+
                         if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
 
                           selectFromCamera(status,beatnamelist[i].toString(),contextt);
+
+                          SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
 
                         }else{
 
@@ -270,8 +215,8 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
                               fontSize: 16.0);
 
                         }
-                      }
 
+                      }
 
                     },
                     child: Container(
@@ -530,6 +475,14 @@ Future<bool> _handleLocationPermission(context) async {
     return false;
   }
   return true;
+}
+
+Future<int> getBatteryLevel() async {
+
+  Battery _battery = Battery();
+  int level = await _battery.batteryLevel;
+
+  return level;
 }
 
 

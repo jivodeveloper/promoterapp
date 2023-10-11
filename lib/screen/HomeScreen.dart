@@ -64,7 +64,7 @@ class HomeScreenState extends State<HomeScreen>{
       );
 
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -125,6 +125,7 @@ class HomeScreenState extends State<HomeScreen>{
   }
 
   void showModal(BuildContext context) {
+
     showDialog(
       context: context,
       builder: (BuildContext context) =>
@@ -142,6 +143,7 @@ class HomeScreenState extends State<HomeScreen>{
           ),
 
     );
+
   }
 
 }

@@ -60,6 +60,7 @@ dev_dependencies:
   path_provider: ^2.0.15
   sqflite: ^2.3.0
   connectivity_plus: ^2.3.0
+  battery_plus: ^2.0.2
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -76,6 +77,7 @@ flutter:
     - assets/Images/jivo_logo.png
     - assets/Images/Calender.png
     - assets/Images/logout.png
+    - assets/Images/complain.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
