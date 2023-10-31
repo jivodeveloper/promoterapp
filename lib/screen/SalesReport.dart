@@ -66,7 +66,6 @@ class SalesReportState extends State<SalesReport>{
           children: [
 
            SizedBox(
-
               child: Row(
                 children: [
 
@@ -168,14 +167,14 @@ class SalesReportState extends State<SalesReport>{
                       ),
                    )
 
-                ],
+               ],
 
-              ),
-            ),
+             ),
+           ),
 
            FutureBuilder<List<saalesreport>>(
-           future: report,
-           builder: (context, snapshot) {
+            future: report,
+            builder: (context, snapshot) {
               if(snapshot.hasData){
 
                return Expanded(
@@ -220,7 +219,7 @@ class SalesReportState extends State<SalesReport>{
                              child:Text(snapshot.data![index].timestamp.toString(),style: TextStyle(fontSize: 16,color: Color(0xFF817373)),),
                            ),
 
-                          ],
+                         ],
                        ),
                      );
 
@@ -230,14 +229,14 @@ class SalesReportState extends State<SalesReport>{
 
               }
               return Container();
-             }
-            )
-           ],
-          ),
-        ),
+              }
+           )
 
-     );
-   }
+          ],
+        ),
+      ),
+    );
+  }
 
   void getproreports(String from,String to){
 

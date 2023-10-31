@@ -143,48 +143,63 @@ Future<dynamic> getallbeat(String endpoint) async{
 
 }
 
-Future<void> markattendance(String status, String beatid,BuildContext context,File file) async {
+Future<void> markattendance(String status, String beatid,BuildContext context,File file,progress) async {
 
-  int userid=0;
-  userid = SharedPrefClass.getInt(USER_ID);
+  try{
 
-  var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}AddSalesPersonAttendance'));
-  request.fields['personId']= userid.toString();
-  request.fields['status']= status;
-  request.fields['latitude']= SharedPrefClass.getDouble(latitude).toString();
-  request.fields['longitude']= SharedPrefClass.getDouble(longitude).toString();
-  request.files.add(await http.MultipartFile.fromPath('image', file.path));
+    int userid=0;
+    userid = SharedPrefClass.getInt(USER_ID);
 
-  var response = await request.send();
-  var responsed = await http.Response.fromStream(response);
-  final responsedData = json.decode(responsed.body);
+    var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}AddSalesPersonAttendance'));
+    request.fields['personId']= userid.toString();
+    request.fields['status']= status;
+    request.fields['latitude']= SharedPrefClass.getDouble(latitude).toString();
+    request.fields['longitude']= SharedPrefClass.getDouble(longitude).toString();
+    request.files.add(await http.MultipartFile.fromPath('image', file.path));
 
-  if(response.statusCode == 200){
+    var response = await request.send();
+    var responsed = await http.Response.fromStream(response);
+    final responsedData = json.decode(responsed.body);
 
-    if(responsedData.contains("DONE")){
+    if(response.statusCode == 200){
 
-      present = true;
-      wo = true;
+      Fluttertoast.showToast(msg: responsedData.toString(),
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+      if(responsedData.contains("DONE")){
+
+        progress.dismiss();
+        present = true;
+        wo = true;
+
+      }
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  HomeScreen()));
+
+    }else{
+
+      Fluttertoast.showToast(msg: "Please contact admin!!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
 
     }
 
-    Fluttertoast.showToast(msg: responsedData.toString(),
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0);
+  }catch(e){
 
-       Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                Dashboard()));
-
-  }else{
-
-    Fluttertoast.showToast(msg: "Please contact admin!!",
+    Fluttertoast.showToast(msg: "$e",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -193,6 +208,7 @@ Future<void> markattendance(String status, String beatid,BuildContext context,Fi
         fontSize: 16.0);
 
   }
+
 
 }
 
@@ -210,7 +226,6 @@ Future<List<saalesreport>> getreports(String endpoint,String from,String to) asy
   try{
 
     beatdata = list.map<saalesreport>((m) => saalesreport.fromJson(Map<String, dynamic>.from(m))).toList();
-    print("beatlist ${beatdata.length}");
 
   }catch(e){
     print("beatlist $e");
@@ -259,7 +274,7 @@ Future<dynamic> getSKU(String endpoint) async{
 
 }
 
-Future<void> savepromotersale(String salesEntry,File file,BuildContext context) async {
+Future<void> savepromotersale(String salesEntry,File file,File file1,File file2,BuildContext context) async {
 
   int userid=0;
   userid = SharedPrefClass.getInt(USER_ID);
@@ -267,16 +282,14 @@ Future<void> savepromotersale(String salesEntry,File file,BuildContext context) 
   var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales'));
   request.fields['salesEntry']= userid.toString();
   request.files.add(await http.MultipartFile.fromPath('image', file.path));
+  request.files.add(await http.MultipartFile.fromPath('image1', file1.path));
+  request.files.add(await http.MultipartFile.fromPath('image2', file2.path));
 
   var response = await request.send();
   var responsed = await http.Response.fromStream(response);
   final responsedData = json.decode(responsed.body);
 
   if(response.statusCode == 200){
-
-    if(responsedData.contains("DONE")){
-
-    }
 
     Fluttertoast.showToast(msg: responsedData.toString(),
         toastLength: Toast.LENGTH_SHORT,
@@ -286,11 +299,13 @@ Future<void> savepromotersale(String salesEntry,File file,BuildContext context) 
         textColor: Colors.white,
         fontSize: 16.0);
 
+
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) =>
                 Dashboard()));
+
 
   }else{
 
@@ -301,7 +316,7 @@ Future<void> savepromotersale(String salesEntry,File file,BuildContext context) 
         backgroundColor: Colors.black,
         textColor: Colors.white,
         fontSize: 16.0);
-    
+
   }
 
 }

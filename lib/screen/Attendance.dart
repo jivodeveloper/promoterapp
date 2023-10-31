@@ -7,7 +7,7 @@ import 'package:promoterapp/util/functionhelper.dart';
 import '../config/Common.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'HomeScreen.dart';
-
+final GlobalKey<ScaffoldState> scaffoldKey2 = new GlobalKey<ScaffoldState>();
 class Attendance extends StatefulWidget{
 
   @override
@@ -94,6 +94,7 @@ class AttendanceState extends State<Attendance>{
 
     return WillPopScope(
        child: Scaffold(
+         key: scaffoldKey2,
             appBar: AppBar(
                 backgroundColor: Colors.white,
                 leading: GestureDetector(
@@ -121,7 +122,7 @@ class AttendanceState extends State<Attendance>{
                         body: SizedBox(
                           width: double.infinity,
                           height: double.infinity,
-                          child:  Column(
+                          child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -137,12 +138,12 @@ class AttendanceState extends State<Attendance>{
                                         final progress  = ProgressHUD.of(context);
                                         progress?.show();
 
-                                      // showdialog("P",context,beatnamelist,beatIdlist);
-                                         showdialogg("P",context,shopdata);
-
-                                         if(present==true){
-
-                                         }
+                                     //  showdialog("P",context,beatnamelist,beatIdlist);
+                                         showdialogg("P",context,shopdata,progress,scaffoldKey2);
+                                         //
+                                         // if(present==true){
+                                         //
+                                         // }
 
                                       }:null,
                                       child:Container(
@@ -156,9 +157,8 @@ class AttendanceState extends State<Attendance>{
                                         child: const Center(
                                             child:Text(
                                               "PRESENT",
-                                              style: TextStyle(color:Colors.white
-                                              ),
-                                            )
+                                              style: TextStyle(color:Colors.white),
+                                           )
                                         ),
                                       ),
                                     ),
@@ -166,13 +166,14 @@ class AttendanceState extends State<Attendance>{
                                     GestureDetector(
 
                                       onTap: eodenabled?(){
+                                        final progress  = ProgressHUD.of(context);
+                                        progress?.show();
+                                        showdialogg("EOD",context, shopdata,progress,scaffoldKey2);
 
-                                        showdialogg("EOD",context, shopdata);
-
-                                       // showdialogg("EOD",context,beatnamelist,beatIdlist);
+                                      // showdialogg("EOD",context,beatnamelist,beatIdlist);
                                       }:null,
 
-                                      child:  Container(
+                                      child:Container(
                                         height: 100,
                                         width: 100,
                                         margin: EdgeInsets.all(10),
@@ -181,10 +182,7 @@ class AttendanceState extends State<Attendance>{
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: const Center(
-                                            child:Text("END OF DAY",style: TextStyle(
-                                                color: Colors.white
-                                            ),
-                                            )
+                                            child:Text("END OF DAY",style: TextStyle(color: Colors.white),)
                                         ),
                                       ),
 
@@ -200,7 +198,9 @@ class AttendanceState extends State<Attendance>{
 
                                     GestureDetector(
                                       onTap: hdenabled?(){
-                                        showdialogg("NOON",context,shopdata);
+                                        final progress  = ProgressHUD.of(context);
+                                        progress?.show();
+                                        showdialogg("NOON",context,shopdata,progress,scaffoldKey2);
                                       }:null,
 
                                       child: Container(
@@ -222,12 +222,16 @@ class AttendanceState extends State<Attendance>{
 
                                     GestureDetector(
                                       onTap:woenabled? (){
-                                        showdialogg("WO",context,shopdata);
+                                        final progress  = ProgressHUD.of(context);
+                                        progress?.show();
+
+                                        showdialogg("WO",context,shopdata,progress,scaffoldKey2);
+
                                       }:null,
                                       child:Container(
                                         height: 100,
                                         width: 100,
-                                        margin: EdgeInsets.all(10),
+                                        margin: const EdgeInsets.all(10),
                                         decoration: BoxDecoration(
                                           color: wo ?  const Color(0xff0e0e0e):Colors.grey,
                                           borderRadius: BorderRadius.circular(12),
@@ -236,7 +240,7 @@ class AttendanceState extends State<Attendance>{
                                             child: Text("WEEK OFF",style: TextStyle(
                                                 color: Colors.white
                                             ),
-                                            )
+                                          )
                                         ),
                                       ),
                                     )
@@ -245,15 +249,18 @@ class AttendanceState extends State<Attendance>{
 
                                 ),
 
-                              ]
+                            ]
+
                           ),
                         )
                     )
                 )
+
             )
         ),
         onWillPop: () {
 
+          Navigator.pop(context);
           Navigator.push(
               context,
               MaterialPageRoute(

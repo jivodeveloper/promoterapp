@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 class DropdownProvider extends ChangeNotifier{
 
-  List<int> selectedSKU= [];
+  List<int> SKUid= [];
   List<int> selectedpieces= [];
 
   /*add category*/
@@ -12,16 +12,14 @@ class DropdownProvider extends ChangeNotifier{
   }
 
   /*add item*/
-  void additemdropdown(int index,int id){
+  void additemdropdown(int index,int pcs,int schemeid){
 
     if (selectedpieces.asMap().containsKey(index)) {
-
-      selectedpieces[index] = id;
-
+      selectedpieces[index] = pcs;
+      SKUid[index] = schemeid;
     } else {
-
-      selectedpieces.insert(index,id);
-
+      selectedpieces.insert(index,pcs);
+      SKUid.insert(index,schemeid);
     }
 
     notifyListeners();
@@ -30,11 +28,10 @@ class DropdownProvider extends ChangeNotifier{
   /*clear all list*/
   void remove(){
 
-    selectedSKU.clear();
+    SKUid.clear();
     selectedpieces.clear();
 
     notifyListeners();
   }
-
 
 }

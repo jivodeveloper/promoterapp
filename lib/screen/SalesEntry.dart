@@ -1,7 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:promoterapp/config/Color.dart';
 import 'package:promoterapp/config/Common.dart';
 import 'package:promoterapp/models/Item.dart';
+import 'package:promoterapp/models/SalesItem.dart';
+import 'package:promoterapp/models/Shops.dart';
 import 'package:promoterapp/screen/Attendance.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:promoterapp/screen/MyWidget.dart';
@@ -14,432 +18,633 @@ import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geocoding/geocoding.dart' as Geocoding;
 import 'package:geolocator/geolocator.dart';
+import 'package:promoterapp/provider/DropdownProvider.dart';
+import 'package:provider/provider.dart';
+import 'package:dotted_border/dotted_border.dart';
+import 'package:permission_handler/permission_handler.dart' as Permissionhandler;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
 
+List dynamicList = [];
 class SalesEntry  extends StatefulWidget{
 
-  @override
-  State<StatefulWidget> createState() {
-    return SalesEntryState();
-  }
+    @override
+    State<StatefulWidget> createState() {
+      return SalesEntryState();
+    }
 
 }
 
-List dynamicList = [];
-
 class SalesEntryState extends State<SalesEntry>{
 
-  Position? currentPosition;
-  String dt = "";
-  List itemlist = [],itemid=[];
-  final DatabaseHelper dbManager = new DatabaseHelper();
-  final connectivityResult = Connectivity().checkConnectivity();
-  NetworkConnectivity networkConnectivity =NetworkConnectivity();
-  int _batteryLevel = 0,userid = 0,shopid=0;
-  bool isturnedon=true;
-  String attstatus="";
-  List<Item> itemdata = [];
+    Position? currentPosition;
+    String dt = "";
+    List itemlist = [], itemid=[];
+    final DatabaseHelper dbManager = DatabaseHelper();
+    final connectivityResult = Connectivity().checkConnectivity();
+    NetworkConnectivity networkConnectivity = NetworkConnectivity();
+    int _batteryLevel = 0,userid = 0,shopid = 0;
+    bool isturnedon = true;
+    String attstatus = "";
+    List<Item> itemdata = [];
+    List allitems = [];
+    int _counter = 0,idx=0;
+    File? cameraFile, cameraFile1,cameraFile2;
+    List<Shops> shopdata = [];
 
-  @override
-  void initState() {
-    super.initState();
+    @override
+    void initState() {
+      super.initState();
 
-    getCurrentPosition();
-    getsharedprefdata();
+      getallbeat('GetShopsData').then((value) => allbeatlist(value));
 
-    getSKU('GetShopsItemData').then((value) => {
+      getCurrentPosition();
+      getsharedprefdata();
+      getofflinedata();
 
-      SKUlist(value,context)
+      getBatteryLevel().then((value) => {
+       _batteryLevel = value
+      });
 
-    });
-
-    getBatteryLevel().then((value) => {
-     _batteryLevel = value
-    });
-
-  }
-
-  getsharedprefdata(){
-
-    userid  = SharedPrefClass.getInt(USER_ID);
-    attstatus = SharedPrefClass.getString(ATT_STATUS);
-    shopid = SharedPrefClass.getInt(SHOP_NAME);
-  }
-
-  void getCurrentPosition() async {
-
-    final hasPermission = await _handleLocationPermission(context);
-    if (!hasPermission) return;
-
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((Position position) {
-      currentPosition = position;
-
-      SharedPrefClass.setDouble(latitude, position.latitude);
-      SharedPrefClass.setDouble(longitude, position.longitude);
-
-      // setState(() => currentPosition = position);
-      _getAddressFromLatLng(currentPosition!);
-
-    }).catchError((e) {
-      debugPrint(e);
-    });
-
-  }
-
-  Future<void> _getAddressFromLatLng(Position position) async {
-
-    await Geocoding.placemarkFromCoordinates(
-        currentPosition!.latitude, currentPosition!.longitude)
-        .then((List<Geocoding.Placemark> placemarks) {
-      Geocoding.Placemark place = placemarks[0];
-
-      // setState(() {
-      //
-      //   _currentAddress = '${place.street}, ${place.subLocality}, ${place.subAdministrativeArea}, ${place.postalCode}';
-      //
-      // });
-
-    }).catchError((e) {
-      debugPrint(e);
-    });
-
-  }
-
-  Future<bool> _handleLocationPermission(context) async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
-    if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location services are disabled. Please enable the services')));
-      return false;
     }
-    permission = await Geolocator.checkPermission();
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
+    void allbeatlist(value){
 
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied')));
+      if(value.length == 0){
 
-        return false;
-      }
-    }
-    if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location permissions are permanently denied, we cannot request permissions.')));
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      child: Scaffold(
-          appBar: AppBar(
-              backgroundColor: Colors.white,
-              leading: GestureDetector(
-                onTap: (){
-
-                  dynamicList.clear();
-
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              HomeScreen()));
-
-                },
-                child: const Icon(Icons.arrow_back,color:Color(0xFF063A06)),
-              ),
-              title: const Text("Sales Entry", style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400)
-              )
-          ),
-          body: attstatus=="P"?ProgressHUD(
-              child:Builder(
-                builder:(ctx)=>
-                    Scaffold(
-                      body: Container(
-
-                          child: Column(
-                            children: [
-
-                              Container(
-                                height: 50,
-                                color: Colors.black12,
-                                child: Row(
-                                  children: [
-
-                                    Expanded(
-                                        flex: 1,
-                                        child:GestureDetector(
-
-                                          onTap: (){
-
-                                            final progress = ProgressHUD.of(ctx);
-                                            progress?.show();
-
-                                            showskudialog(context,itemdata,progress);
-
-                                           // if(connectivityResult==ConnectivityResult.none){
-
-
-                                          //  }
-
-                                            // else{
-                                            //
-                                            //   print("list size offline$connectivityResult");
-                                            //   showskudialog(context,itemlist,itemid);
-                                            //   progress?.dismiss();
-                                            //
-                                            // }
-
-                                          },
-
-                                          child: Container(
-
-                                            child:const Center(
-                                              child:Text("+",style: TextStyle(
-                                                  fontSize: 25
-                                              ),
-                                              ),
-                                            ),
-                                          ),
-
-                                        )
-                                    ),
-
-                                    Expanded(
-                                        child:GestureDetector(
-
-                                          onTap: (){
-                                            getdate(context).then((value) => {
-                                              setState((){
-                                                dt =value;
-                                              })
-                                            });
-                                          },
-
-                                          child: Container(
-                                            child: Center(
-                                              child: Text(dt == ""?"Date" :dt,style: TextStyle(fontSize: 16),
-                                              ),
-                                            ),
-                                          ),
-
-                                        )
-                                    ),
-
-                                    Expanded(
-                                        flex: 1,
-                                        child: GestureDetector(
-                                          onTap: (){
-                                            save();
-                                          },
-                                          child: Center(
-                                            child: Text("SAVE",style: TextStyle(
-                                                fontSize: 16
-                                            ),
-                                            ),
-                                          ),
-                                        )
-                                    ),
-
-                                  ],
-                                ),
-                              ),
-
-                              Expanded(
-                                child: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: dynamicList.length,
-                                    itemBuilder: (_, index) =>
-                                    dynamicList[index]
-                                ),
-                              ),
-
-                            ],
-                          )
-                      ),
-                    ),
-              )
-          ):AlertDialog(
-
-            content:Wrap(
-              children: [
-
-                Image.asset('assets/Images/complain.png',width: 40,height: 40,),
-                Container(
-                  margin: EdgeInsets.all(10),
-                  child:Text("First Mark Present"),
-                )
-
-              ],
-            ),
-            actions: <Widget>[
-
-              TextButton(
-                onPressed: () => {
-
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              HomeScreen()))
-
-                },
-                child: const Text('Cancel'),
-              ),
-
-              TextButton(
-                onPressed: () =>{
-
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              Attendance()))
-
-                },
-                child: const Text('Ok'),
-              ),
-
-            ],
-
-          )
-      ),
-      onWillPop:() async{
+        Future.delayed(Duration(seconds: 3), () {
 
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (contextt) =>
+                  builder: (context) =>
                       HomeScreen()));
 
-          return new Future(() => true);
-        }
-    );
-  }
+        });
 
-  Future<void> SKUlist(value,context) async {
+        Fluttertoast.showToast(msg: "You don't have any beat! \n Please contact admin",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0);
 
-    itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
+      }else{
 
-   // // int? id = await dbManager.insertdata(itemdata);
-   //
-   //  itemlist.clear();
-   //  itemid.clear();
-   //
-   //  for(int i=0 ;i<itemdata.length;i++) {
-   //
-   //    itemlist.add(itemdata[i].itemName);
-   //    itemid.add(itemdata[i].itemID);
-   //
-   //  }
+        shopdata = value;
 
-  }
+        // for(int i=0 ;i<value.length;i++){
+        //
+        //   if(value[i].retailerName != ""){
+        //
+        //     print("length${value.length}");
+        //
+        //     setState(() {
+        //
+        //       beatnamelist.add(value[i].retailerName.toString());
+        //       beatIdlist.add(value[i].retailerID!.toInt());
+        //
+        //     });
+        //
+        //   }
+        //
+        // }
+        //
+        // beatnamelist = LinkedHashSet<String>.from(beatnamelist).toList();
+        //
+        // beatIdlist = LinkedHashSet<int>.from(beatIdlist).toList();
 
-  Future<void> save() async {
-
-    int userid = SharedPrefClass.getInt(USER_ID);
-    List<Item> items = [];
-
-    for(int i=0;i<dynamicList.length;i++){
-
-     // items.add(SalesItem(int.parse(dropdownOptionsProvider.selecteditemid[i].toString()),int.parse(dropdownOptionsProvider.selecteditemorder[i].toString()),int.parse(dropdownOptionsProvider.selecteditemstock[i].toString()),0));
+      }
 
     }
 
-    var salesentry=[{
+    getofflinedata() async{
 
-      "personId":userid,
-      "shopId":shopid,
-      "timeStamp":getcurrentdate(),
-      "latitude":currentPosition?.latitude,
-      "longitude":currentPosition?.longitude,
-      "battery":_batteryLevel,
-      "GpsEnabled":"GPS",
-      "accuracy" : currentPosition?.accuracy,
-      "speed" : currentPosition?.speed,
-      "provider" : "GPS",
-      "altitude":currentPosition?.altitude,
-      "items":[{
-        "itemId":24,
-        "itemPieces":2,
-        "itemQuantity":1
-       }]
+      // if(await checkNetwork())
+      // {
+      //
+      //   getSKU('GetShopsItemData').then((value) => {
+      //     SKUlist(value,context)
+      //   });
+      //
+      // }else{
 
-    }];
+         allitems = await DatabaseHelper.getItems();
+        // itemdata = allitems.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
 
-    var body = json.encode(salesentry);
-    print("${body.toString()}");
-    // int id=0;
-    //
-    // dbManager.savesaledata(body.toString()).then((value) => id = value);
-    //
-    // if(id>0){
-    //
-    // }
+         print("itemdata list ${itemdata.length}");
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                HomeScreen()));
+     // }
+    }
 
-  }
+    getsharedprefdata(){
 
-  void addwidget(skUlist,itemid,imageurl) async{
+      userid  = SharedPrefClass.getInt(USER_ID);
+      attstatus = SharedPrefClass.getString(ATT_STATUS);
+      shopid = SharedPrefClass.getInt(SHOP_ID);
+      print("$shopid");
+    }
 
-    setState(() {
-      dynamicList.add(MyWidget(skUlist,itemid,imageurl));
-    });
+    void getCurrentPosition() async {
 
-  }
+      final hasPermission = await _handleLocationPermission(context);
+      if (!hasPermission) return;
 
-  Future<void> showskudialog(context, List<Item> SKUlist,progress) async {
+      await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
+          .then((Position position) {
+        currentPosition = position;
 
-    progress.dismiss();
+        SharedPrefClass.setDouble(latitude, position.latitude);
+        SharedPrefClass.setDouble(longitude, position.longitude);
 
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        context = context;
-        return AlertDialog(
-          title: const Text('Select SKU'),
-          content: ListView.builder(
-              shrinkWrap: true,
-              itemCount: SKUlist.length,
-              itemBuilder: (context,i){
-                return GestureDetector(
+        // setState(() => currentPosition = position);
+        _getAddressFromLatLng(currentPosition!);
 
-                    onTap: (){
+      }).catchError((e) {
+        debugPrint(e);
+      });
 
-                      Navigator.pop(context);
-                      addwidget(SKUlist[i].itemName,SKUlist[i].itemID,SKUlist[i].imageurl);
+    }
 
-                    },
+    Future<void> _getAddressFromLatLng(Position position) async {
 
-                    child: Container(
-                      padding:const EdgeInsets.all(10),
-                      child: Text("${SKUlist[i].itemName}"),
-                    )
+      await Geocoding.placemarkFromCoordinates(
+          currentPosition!.latitude, currentPosition!.longitude)
+          .then((List<Geocoding.Placemark> placemarks) {
+        Geocoding.Placemark place = placemarks[0];
 
-                );
-              }
-          )
-        );
-      },
-    );
+      }).catchError((e) {
+        debugPrint(e);
+      });
 
-  }
+    }
+
+    Future<bool> _handleLocationPermission(context) async {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+      if (!serviceEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Location services are disabled. Please enable the services')));
+        return false;
+      }
+      permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permissions are denied')));
+
+          return false;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Location permissions are permanently denied, we cannot request permissions.')));
+        return false;
+      }
+      return true;
+    }
+
+    @override
+    Widget build(BuildContext context) {
+
+      final dropdownOptionsProvider = Provider.of<DropdownProvider>(context);
+      return WillPopScope(
+        child: Scaffold(
+            appBar: AppBar(
+                backgroundColor: Colors.white,
+                leading: GestureDetector(
+                  onTap: (){
+
+                    dynamicList.clear();
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                HomeScreen()));
+
+                  },
+                  child: const Icon(Icons.arrow_back,color:Color(0xFF063A06)),
+                ),
+                actions: [
+
+                  AnimatedOpacity(
+                    opacity: _counter != 0 ? 1 : 0,
+                    duration: Duration(milliseconds: 500),
+                    child: const Text(
+                      '0',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+
+               ],
+                 title: const Text("Sales Entry", style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400))
+            ),
+            body: attstatus=="P"? ProgressHUD(
+                child:Builder(
+                  builder:(ctx)=>
+                      Scaffold(
+                        body: Column(
+                          children: [
+
+                            Container(
+                              height: 50,
+                              color: Colors.black12,
+                              child: Row(
+                                children: [
+
+                                  Expanded(
+                                      flex: 1,
+                                      child:GestureDetector(
+
+                                        onTap: (){
+
+                                          final progress = ProgressHUD.of(ctx);
+                                          progress?.show();
+
+                                          showskudialog(context,allitems,progress);
+
+                                          //if(connectivityResult==ConnectivityResult.none){
+
+                                          //}
+
+                                          //else{
+
+                                          //print("list size offline$connectivityResult");
+                                          //showskudialog(context,itemlist,itemid);
+                                          //progress?.dismiss();
+
+                                          //}
+
+                                        },
+
+                                        child:Container(
+                                          child:  const Center(
+                                            child:Text("+",style: TextStyle(
+                                                fontSize: 25
+                                             ),
+                                            ),
+                                          ),
+                                        )
+
+                                      )
+                                  ),
+
+                                  Expanded(
+                                      child:GestureDetector(
+
+                                        onTap: (){
+                                          getdate(context).then((value) => {
+                                            setState((){
+                                              dt =value;
+                                            })
+                                          });
+                                        },
+
+                                        child: Container(
+                                          child: Center(
+                                            child: Text(dt == ""?"Date" :dt,style: TextStyle(fontSize: 16),
+                                            ),
+                                          ),
+                                        ),
+
+                                      )
+                                  ),
+
+                                  Expanded(
+                                      flex: 1,
+                                      child: GestureDetector(
+                                        onTap: (){
+                                          save(dropdownOptionsProvider,context);
+                                        },
+                                        child: const Center(
+                                          child: Text("SAVE",style: TextStyle(
+                                              fontSize: 16
+                                              ),
+                                           ),
+                                        ),
+                                     )
+                                  ),
+
+                                ],
+                              ),
+                            ),
+
+                            Row(
+                              children: [
+
+                                Expanded(
+                                    flex: 1,
+                                    child: InkWell(
+                                      onTap: (){
+                                          selectFromCamera("image");
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(5),
+                                        height: 100,
+                                        child: DottedBorder(
+                                            color:grey,
+                                            strokeWidth: 1,
+                                            child:Center(
+                                              child:cameraFile==null?Image.asset('assets/Images/plus.png',height: 15):Image.file(File(cameraFile!.path),width: MediaQuery.of(context).size.width)
+                                          ),
+                                        ),
+                                      )
+                                   ),
+                                ),
+
+                                Expanded(
+                                  flex: 1,
+                                  child:InkWell(
+                                    onTap: (){
+                                      selectFromCamera("image1");
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(5),
+                                      height: 100,
+                                      child: DottedBorder(
+                                          color:grey,
+                                          strokeWidth: 1,
+                                          child:Center(
+                                              child:cameraFile1==null?Image.asset('assets/Images/plus.png',height: 15):Image.file(File(cameraFile1!.path))
+
+                                          )
+                                      ),
+                                    ),
+                                  )
+                                ),
+
+                                Expanded(
+                                    flex: 1,
+                                    child:InkWell(
+                                      onTap: (){
+                                        selectFromCamera("image2");
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(5),
+                                        height: 100,
+                                        child: DottedBorder(
+                                            color:grey,
+                                            strokeWidth: 1,
+                                            child:Center(
+                                                child:cameraFile2==null?Image.asset('assets/Images/plus.png',height: 15):Image.file(File(cameraFile2!.path))
+
+                                            )
+                                        ),
+                                      ),
+                                    )
+                                ),
+
+                              ],
+                            ),
+
+                            Expanded(
+                             child: ListView.builder(
+                                    shrinkWrap: true,
+                                  itemCount: dynamicList.length,
+                                  itemBuilder: (_, index) =>
+                                  dynamicList[index]
+                              ),
+                            ),
+
+                          ],
+                       ),
+                    ),
+                )
+            ):AlertDialog(
+
+              content:Wrap(
+                children: [
+
+                  Image.asset('assets/Images/complain.png',width: 40,height: 40,),
+                  Container(
+                    margin: EdgeInsets.all(10),
+                    child:Text("First Mark Present"),
+                  )
+
+                ],
+              ),
+              actions: <Widget>[
+
+                TextButton(
+                  onPressed: () => {
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                HomeScreen()))
+
+                  },
+                  child: const Text('Cancel'),
+                ),
+
+                TextButton(
+                  onPressed: () =>{
+
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                Attendance()))
+
+                  },
+                  child: const Text('Ok'),
+                ),
+
+              ],
+
+            )
+          ),
+          onWillPop:() async{
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (contextt) =>
+                        HomeScreen()));
+
+            return new Future(() => true);
+
+        }
+      );
+
+    }
+
+    Future<void> SKUlist(value,context) async {
+
+      itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
+
+    }
+
+    Future<void> save(DropdownProvider dropdownOptionsProvider,context) async {
+
+      int userid = SharedPrefClass.getInt(USER_ID);
+      List<SalesItem> items = [];
+
+      if(cameraFile==null){
+
+        Fluttertoast.showToast(msg: "Please select image");
+
+      }else{
+
+        for(int i=0;i<dynamicList.length;i++){
+
+          items.add(SalesItem(int.parse(dropdownOptionsProvider.SKUid[i].toString()),int.parse(dropdownOptionsProvider.selectedpieces[i].toString()),int.parse(dropdownOptionsProvider.selectedpieces[i].toString())));
+
+        }
+
+        var salesentry=[{
+
+          "personId":userid,
+          "shopId":shopid,
+          "timeStamp":getcurrentdate(),
+          "latitude":currentPosition?.latitude,
+          "longitude":currentPosition?.longitude,
+          "battery":_batteryLevel,
+          "GpsEnabled":"GPS",
+          "accuracy" : currentPosition?.accuracy,
+          "speed" : currentPosition?.speed,
+          "provider" : "GPS",
+          "altitude":currentPosition?.altitude,
+          "items":items,
+          "imgUrl":"768-27-3-123-1682599870613.jpg",
+          "imgUrl1":"768-27-3-123-1682599870613.jpg",
+          "imgUrl2":"768-27-3-123-1682599870613.jpg"
+
+        }];
+
+        var body = json.encode(salesentry);
+
+        savepromotersale(body.toString(),cameraFile!,cameraFile1!,cameraFile2!,context);
+
+      }
+
+    }
+
+    void addwidget(skUlist,itemid,imageurl) async{
+
+      setState(() {
+        dynamicList.add(MyWidget(skUlist,itemid,imageurl,idx));
+      });
+
+      idx++;
+
+    }
+
+    Future<void> showskudialog(context, List SKUlist,progress) async {
+
+      progress.dismiss();
+
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          context = context;
+          return AlertDialog(
+            title: const Text('Select SKU'),
+            content: ListView.builder(
+                shrinkWrap: true,
+                itemCount: SKUlist.length,
+                itemBuilder: (context,i){
+                  return GestureDetector(
+
+                      onTap: (){
+
+                        Navigator.pop(context);
+                        addwidget(SKUlist[i]['itemName'],SKUlist[i]['itemID'],SKUlist[i]['imageurl']);
+
+                      },
+
+                      child: Container(
+                        padding:const EdgeInsets.all(10),
+                        child: Text("${SKUlist[i]['itemName']}"),
+                      )
+
+                  );
+               }
+            )
+          );
+        },
+      );
+
+    }
+
+    selectFromCamera(String s) async {
+
+      var camerastatus = await Permissionhandler.Permission.camera.status;
+
+      if(camerastatus.isDenied == true){
+
+        Fluttertoast.showToast(msg: "Please allow camera permission!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0);
+
+        Map<Permissionhandler.Permission, Permissionhandler.PermissionStatus> statuses = await [
+          Permissionhandler.Permission.camera
+        ].request();
+
+      }else{
+
+        try{
+
+          File? f;
+          int userid=0;
+          userid = SharedPrefClass.getInt(USER_ID);
+
+          final cameraFile= await ImagePicker().pickImage(source: ImageSource.camera,imageQuality: 50);
+
+          final now = new DateTime.now();
+          String dir = path.dirname(cameraFile!.path);
+          String newPath = path.join(dir,("$userid-${now.day}-${now.month}-${now.year}-${now.hour}${now.minute}${now.second}.jpg"));
+          f = await File(cameraFile.path).copy(newPath);
+
+          if(s=="image"){
+
+            setState(() {
+              this.cameraFile = File(cameraFile.path);
+            });
+
+          }else if(s=="image1"){
+
+            setState(() {
+              this.cameraFile1 = File(cameraFile.path);
+            });
+
+          }else if(s=="image2"){
+
+            setState(() {
+              this.cameraFile2 = File(cameraFile.path);
+            });
+
+          }
+
+        }catch(e){
+
+          print('Failed to pick image: $e');
+
+        }
+
+      }
+
+    }
 
 }
 

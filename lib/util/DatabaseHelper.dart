@@ -55,7 +55,6 @@ class DatabaseHelper {
 
     }
 
-
     return id;
   }
 

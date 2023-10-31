@@ -88,7 +88,6 @@ class LoginScreenState extends State<LoginScreen> {
 
                                       ],
                                     ),
-
                                   ),
 
                                   Form(
@@ -162,7 +161,7 @@ class LoginScreenState extends State<LoginScreen> {
                                     },
 
                                     child: Container(
-                                      margin: const EdgeInsets.only(
+                                      margin: EdgeInsets.only(
                                           left: 10, top: 40, right: 10, bottom: 10),
                                       width: double.infinity,
                                       height: 55,
@@ -178,6 +177,7 @@ class LoginScreenState extends State<LoginScreen> {
                                           style: TextStyle(color: Colors.white),
                                         ),
                                       ),
+
                                     ),
 
                                   )

@@ -1,4 +1,5 @@
 class Item {
+
   int? itemID;
   String? itemName;
   String? itemCode;
@@ -18,18 +19,16 @@ class Item {
   String? options;
   bool? isVisibleToRetailer;
   bool? isRedeemable;
-  num? boxes;
   String? imageurl;
 
-  Item(
-      {this.itemID,
+  Item({this.itemID,
         this.itemName,
         this.quantity,
         this.piecesPerCase,
         this.itemTypeId,
         this.options,
         this.imageurl
-     });
+  });
 
   Item.fromJson(Map<String, dynamic> json) {
     itemID = json['itemID'];
@@ -53,7 +52,6 @@ class Item {
     options = json['options'];
     imageurl = json['imageURL'];
   }
-
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();

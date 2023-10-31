@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:promoterapp/screen/SalesEntry.dart';
 import 'package:promoterapp/screen/SalesReport.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
-
+final GlobalKey<ScaffoldState> scaffoldKey2 = new GlobalKey<ScaffoldState>();
 class HomeScreen extends StatefulWidget{
 
   @override
@@ -64,12 +64,13 @@ class HomeScreenState extends State<HomeScreen>{
       );
 
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
 
         child: Scaffold(
+          key: scaffoldKey2,
           body: [
 
             Dashboard(),

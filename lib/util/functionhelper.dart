@@ -24,6 +24,8 @@ void getAttendanceStatus() async {
 
     penabled = true;
     woenabled = true;
+    eod = false;
+    hd = false;
     eodenabled =false;
     hdenabled =false;
 
@@ -45,8 +47,18 @@ void getAttendanceStatus() async {
     wo = false;
     hd = false;
 
-  }else if(attStatus=="HD")
-  {
+  }else if(attStatus=="NOON") {
+
+    penabled = false;
+    woenabled =false;
+    eodenabled =true;
+    hdenabled =false;
+    present = false;
+    eod = true;
+    wo = false;
+    hd = false;
+
+  }else if(attStatus=="WO") {
 
     penabled = false;
     woenabled =false;
@@ -56,50 +68,16 @@ void getAttendanceStatus() async {
     eod = false;
     wo = false;
     hd = false;
+    present = false;
 
   }
-
-  // if(attStatus==""){
-  //
-  //   pr = true;
-  //   eod = false;
-  //   wo = true;
-  //   hd = true;
-  //
-  // }else if(attStatus=="P"){
-  //
-  //   pr = false;
-  //   wo = false;
-  //   eod = true;
-  //   hd = true;
-  //
-  // }else if(attStatus=="EOD"){
-  //
-  //   pr = false;
-  //   eod = false;
-  //   wo = false;
-  //   hd = false;
-  //
-  // }else if(attStatus=="NOON"){
-  //
-  //   pr = false;
-  //   eod = true;
-  //   wo = false;
-  //   hd = false;
-  //
-  // }else if(attStatus=="WO"){
-  //
-  //   pr = false;
-  //   eod = false;
-  //   wo = false;
-  //   hd = false;
-  //
-  // }
 
 }
 
 Future<bool> checkNetwork() async {
+
   bool isConnected = false;
+
   try {
     final result = await InternetAddress.lookup('google.com');
     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
@@ -108,51 +86,61 @@ Future<bool> checkNetwork() async {
   } on SocketException catch (_) {
     isConnected = false;
   }
+
   return isConnected;
 }
 
-Future<void> showdialogg(String status,context, List<Shops> listdata) async {
+Future<void> showdialogg(String status,context, List<Shops> listdata,progress,scaffoldKey2) async {
 
   return showDialog(
-      context: context,
+      barrierDismissible: false,
+      context: scaffoldKey2.currentContext,
       builder:(BuildContext context) {
         return AlertDialog(
           title: const Text('Attendance'),
           content: const Text('Are you really present?'),
           actions: <Widget>[
+
             TextButton(
-              onPressed: () => Navigator.pop(context, 'Cancel'),
+              onPressed: () => {
+                Navigator.pop(context, 'Cancel'),
+                progress!.dismiss()
+              },
               child: const Text('No'),
             ),
+
             TextButton(
               onPressed: () =>
-              // gettodaysbeat(status,context,beatnamelist,beatIdlist)
-              gettodaysbeatt(status,context,listdata),
+              gettodaysbeatt(status,context,listdata,progress,scaffoldKey2),
               child: const Text('Yes'),
-            ),
-          ],
-        );
+              ),
+
+            ],
+
+          );
       }
   );
 
 }
 
-Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist) async {
+Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist,progress,scaffoldKey2) async {
 
   int beatId = (SharedPrefClass.getInt(BEAT_ID)==0 ? -1 : SharedPrefClass.getInt(BEAT_ID));
 
   if(beatId==0 || beatId ==-1){
-   // showbeat(status,context,beatnamelist,beatIdlist);
-    showbeatt(status,context,beatnamelist);
+
+     //showbeat(status,context,beatnamelist,beatIdlist);
+     showbeatt(status,context,beatnamelist,progress,scaffoldKey2);
+
   }else{
 
-    markattendance(status,beatId.toString(),context,"" as File);
+    markattendance(status,beatId.toString(),context,"" as File,progress);
 
   }
 
 }
 
-Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist) async {
+Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist,progress,scaffoldKey2) async {
 
   if(beatnamelist.isEmpty){
 
@@ -171,7 +159,7 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
     Navigator.pop(contextt);
 
     return showDialog<void>(
-      context: contextt,
+      context: scaffoldKey2.currentContext,
       barrierDismissible: false,
       builder: (BuildContext context) {
         contextt = context;
@@ -182,10 +170,10 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
               itemCount: beatnamelist.length,
               itemBuilder: (context,i){
                 return GestureDetector(
+
                     onTap: (){
 
                       Navigator.pop(contextt);
-
                       if(SharedPrefClass.getDouble(latitude)==0.0){
 
                         Fluttertoast.showToast(msg: "Please check your connection!",
@@ -200,9 +188,9 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
 
                         if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
 
-                          selectFromCamera(status,beatnamelist[i].toString(),contextt);
-
+                          print("retailerId ${beatnamelist[i].retailerID!.toInt()}");
                           SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
+                          selectFromCamera(status,beatnamelist[i].toString(),contextt,progress);
 
                         }else{
 
@@ -234,7 +222,7 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
 
 }
 
-selectFromCamera(String status, String beatid, contextt) async {
+selectFromCamera(String status, String beatid, contextt,progress) async {
 
   var camerastatus = await Permissionhandler.Permission.camera.status;
 
@@ -267,7 +255,7 @@ selectFromCamera(String status, String beatid, contextt) async {
         String newPath = path.join(dir,("$userid-${now.day}-${now.month}-${now.year}-${now.hour}${now.minute}${now.second}.jpg"));
         f = await File(cameraFile.path).copy(newPath);
 
-        markattendance(status,beatid,contextt,f);
+        markattendance(status,beatid,contextt,f,progress);
 
     }catch(e){
 
@@ -324,15 +312,12 @@ bool getdistance(lat1 ,lng1, lat2, lng2){
 
   int disallow = SharedPrefClass.getInt(DISTANCE_ALLOWED);
 
-  print("$totaldist $disallow");
-
   if(disallow > totaldist){
     isallowed = true;
   }else{
     isallowed = false;
   }
 
-  print("isallowed $isallowed");
   return isallowed;
 
 }
