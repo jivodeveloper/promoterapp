@@ -215,6 +215,7 @@ class LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () async {
 
+
                   SharedPreferences preferences = await SharedPreferences
                       .getInstance();
                   preferences.clear();

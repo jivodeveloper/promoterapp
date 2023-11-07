@@ -50,13 +50,15 @@ class SalesEntryState extends State<SalesEntry>{
     List<Item> itemdata = [];
     List allitems = [];
     int _counter = 0,idx=0;
-    File? cameraFile, cameraFile1,cameraFile2;
+    File? cameraFile, cameraFile1,cameraFile2,f,f1,f2;
     List<Shops> shopdata = [];
+    bool _isLoading = false;
 
     @override
     void initState() {
       super.initState();
 
+      getuserdetails('Userdetails');
       getallbeat('GetShopsData').then((value) => allbeatlist(value));
 
       getCurrentPosition();
@@ -122,29 +124,18 @@ class SalesEntryState extends State<SalesEntry>{
 
     getofflinedata() async{
 
-      // if(await checkNetwork())
-      // {
-      //
-      //   getSKU('GetShopsItemData').then((value) => {
-      //     SKUlist(value,context)
-      //   });
-      //
-      // }else{
+      allitems.clear();
+      allitems = await DatabaseHelper.getItems();
 
-         allitems = await DatabaseHelper.getItems();
-        // itemdata = allitems.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
-
-         print("itemdata list ${itemdata.length}");
-
-     // }
     }
 
     getsharedprefdata(){
 
       userid  = SharedPrefClass.getInt(USER_ID);
       attstatus = SharedPrefClass.getString(ATT_STATUS);
+      print("attstatus $attstatus");
       shopid = SharedPrefClass.getInt(SHOP_ID);
-      print("$shopid");
+
     }
 
     void getCurrentPosition() async {
@@ -215,11 +206,12 @@ class SalesEntryState extends State<SalesEntry>{
     }
 
     @override
-    Widget build(BuildContext context) {
+    Widget build(BuildContext context)  {
 
       final dropdownOptionsProvider = Provider.of<DropdownProvider>(context);
       return WillPopScope(
         child: Scaffold(
+
             appBar: AppBar(
                 backgroundColor: Colors.white,
                 leading: GestureDetector(
@@ -253,7 +245,7 @@ class SalesEntryState extends State<SalesEntry>{
                ],
                  title: const Text("Sales Entry", style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400))
             ),
-            body: attstatus=="P"? ProgressHUD(
+            body: attstatus=="P" || attstatus=="NOON"? ProgressHUD(
                 child:Builder(
                   builder:(ctx)=>
                       Scaffold(
@@ -276,18 +268,6 @@ class SalesEntryState extends State<SalesEntry>{
                                           progress?.show();
 
                                           showskudialog(context,allitems,progress);
-
-                                          //if(connectivityResult==ConnectivityResult.none){
-
-                                          //}
-
-                                          //else{
-
-                                          //print("list size offline$connectivityResult");
-                                          //showskudialog(context,itemlist,itemid);
-                                          //progress?.dismiss();
-
-                                          //}
 
                                         },
 
@@ -327,15 +307,23 @@ class SalesEntryState extends State<SalesEntry>{
                                   Expanded(
                                       flex: 1,
                                       child: GestureDetector(
+
                                         onTap: (){
-                                          save(dropdownOptionsProvider,context);
+
+                                          final progress  = ProgressHUD.of(ctx);
+
+
+                                          save(dropdownOptionsProvider,context,progress);
                                         },
-                                        child: const Center(
-                                          child: Text("SAVE",style: TextStyle(
-                                              fontSize: 16
-                                              ),
-                                           ),
-                                        ),
+
+                                        child:Container(
+                                          child:  const Center(
+                                            child:Text("SAVE",style: TextStyle(
+                                                fontSize: 16
+                                            ),
+                                            ),
+                                          ),
+                                        )
                                      )
                                   ),
 
@@ -425,7 +413,6 @@ class SalesEntryState extends State<SalesEntry>{
                     ),
                 )
             ):AlertDialog(
-
               content:Wrap(
                 children: [
 
@@ -471,6 +458,8 @@ class SalesEntryState extends State<SalesEntry>{
           ),
           onWillPop:() async{
 
+          dynamicList.clear();
+
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -490,49 +479,94 @@ class SalesEntryState extends State<SalesEntry>{
 
     }
 
-    Future<void> save(DropdownProvider dropdownOptionsProvider,context) async {
+    Future<void> save(DropdownProvider dropdownOptionsProvider,context,progress) async {
 
       int userid = SharedPrefClass.getInt(USER_ID);
       List<SalesItem> items = [];
 
-      if(cameraFile==null){
+        int i = 0 ;
+        dynamicList.forEach((widget) {
+
+          String pieces = widget.pieces.text;
+
+          if (pieces != "") {
+            i++;
+          }
+
+        });
+
+        if(dynamicList.length==0){
+
+          Fluttertoast.showToast(msg: "Please select SKU");
+
+        }else if(i!=dynamicList.length){
+
+          Fluttertoast.showToast(msg: "Please enter pieces");
+
+        }else if(cameraFile==null){
 
         Fluttertoast.showToast(msg: "Please select image");
 
-      }else{
+        }else if(dt==""){
 
-        for(int i=0;i<dynamicList.length;i++){
+          Fluttertoast.showToast(msg: "Please select date");
 
-          items.add(SalesItem(int.parse(dropdownOptionsProvider.SKUid[i].toString()),int.parse(dropdownOptionsProvider.selectedpieces[i].toString()),int.parse(dropdownOptionsProvider.selectedpieces[i].toString())));
+        }else {
+          progress?.show();
+          for (int i = 0; i < dynamicList.length; i++) {
+            items.add(SalesItem(
+                int.parse(dropdownOptionsProvider.SKUid[i].toString()),
+                int.parse(dropdownOptionsProvider.selectedpieces[i].toString()),
+                int.parse(
+                    dropdownOptionsProvider.selectedpieces[i].toString())));
+          }
+
+          var salesentry = [{
+
+            "personId": userid,
+            "shopId": shopid,
+            "timeStamp": dt,
+            "latitude": currentPosition?.latitude,
+            "longitude": currentPosition?.longitude,
+            "battery": _batteryLevel,
+            "GpsEnabled": "GPS",
+            "accuracy": currentPosition?.accuracy,
+            "speed": currentPosition?.speed,
+            "provider": "GPS",
+            "altitude": currentPosition?.altitude,
+            "items": items,
+
+            }
+          ];
+
+          var body = json.encode(salesentry);
+
+
+          try{
+            print("body value $f1");
+            if(f1==null && f2==null){
+
+              print("first");
+              savepromotersale(body.toString(), f!.path.toString(), "", "", context, progress,dynamicList);
+
+            }else if(f1==null){
+
+              print("second");
+              savepromotersale(body.toString(), f!.path.toString(), "", f2!.path.toString(), context, progress,dynamicList);
+
+            }else if(f2==null){
+
+              print("third");
+              savepromotersale(body.toString(), f!.path.toString(), f1!.path.toString(),"", context, progress,dynamicList);
+            }
+
+          //  savepromotersale(body.toString(), f!.path.toString(), f1!.path.toString(),"", context, progress);
+
+          }catch(e){
+            print("$e");
+          }
 
         }
-
-        var salesentry=[{
-
-          "personId":userid,
-          "shopId":shopid,
-          "timeStamp":getcurrentdate(),
-          "latitude":currentPosition?.latitude,
-          "longitude":currentPosition?.longitude,
-          "battery":_batteryLevel,
-          "GpsEnabled":"GPS",
-          "accuracy" : currentPosition?.accuracy,
-          "speed" : currentPosition?.speed,
-          "provider" : "GPS",
-          "altitude":currentPosition?.altitude,
-          "items":items,
-          "imgUrl":"768-27-3-123-1682599870613.jpg",
-          "imgUrl1":"768-27-3-123-1682599870613.jpg",
-          "imgUrl2":"768-27-3-123-1682599870613.jpg"
-
-        }];
-
-        var body = json.encode(salesentry);
-
-        savepromotersale(body.toString(),cameraFile!,cameraFile1!,cameraFile2!,context);
-
-      }
-
     }
 
     void addwidget(skUlist,itemid,imageurl) async{
@@ -570,8 +604,8 @@ class SalesEntryState extends State<SalesEntry>{
                       },
 
                       child: Container(
-                        padding:const EdgeInsets.all(10),
-                        child: Text("${SKUlist[i]['itemName']}"),
+                         padding:const EdgeInsets.all(10),
+                         child: Text("${SKUlist[i]['itemName']}"),
                       )
 
                   );
@@ -605,7 +639,6 @@ class SalesEntryState extends State<SalesEntry>{
 
         try{
 
-          File? f;
           int userid=0;
           userid = SharedPrefClass.getInt(USER_ID);
 
@@ -614,22 +647,25 @@ class SalesEntryState extends State<SalesEntry>{
           final now = new DateTime.now();
           String dir = path.dirname(cameraFile!.path);
           String newPath = path.join(dir,("$userid-${now.day}-${now.month}-${now.year}-${now.hour}${now.minute}${now.second}.jpg"));
-          f = await File(cameraFile.path).copy(newPath);
 
           if(s=="image"){
 
+            f = await File(cameraFile.path).copy(newPath);
             setState(() {
               this.cameraFile = File(cameraFile.path);
             });
 
           }else if(s=="image1"){
 
+            f1 = await File(cameraFile.path).copy(newPath);
             setState(() {
               this.cameraFile1 = File(cameraFile.path);
+
             });
 
           }else if(s=="image2"){
 
+            f2 = await File(cameraFile.path).copy(newPath);
             setState(() {
               this.cameraFile2 = File(cameraFile.path);
             });

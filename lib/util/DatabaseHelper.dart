@@ -42,7 +42,9 @@ class DatabaseHelper {
   }
 
   Future<int> savesaledata(String json) async {
+
     int id=0;
+
     try{
 
       final db = await DatabaseHelper.db();
@@ -89,6 +91,17 @@ class DatabaseHelper {
     } catch (err) {
      // debugPrint("Something went wrong when deleting an item: $err");
     }
+  }
+
+  static Future<void> deleteall() async {
+
+    final db = await DatabaseHelper.db();
+    try {
+      await db.delete("SKU");
+    } catch (err) {
+
+    }
+
   }
 
 }

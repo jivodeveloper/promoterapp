@@ -1,3 +1,4 @@
+import 'package:location/location.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -7,7 +8,8 @@ import 'package:promoterapp/util/functionhelper.dart';
 import '../config/Common.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'HomeScreen.dart';
-final GlobalKey<ScaffoldState> scaffoldKey2 = new GlobalKey<ScaffoldState>();
+import 'package:permission_handler/permission_handler.dart' as Permissionhandler;
+
 class Attendance extends StatefulWidget{
 
   @override
@@ -27,14 +29,68 @@ class AttendanceState extends State<Attendance>{
   bool _isLoading = false;
   get progress => null;
   List<Shops> shopdata = [];
+  bool cstatus = false ,lstatus =false,gpsstatus=false;
+  Location location = new Location();
 
   @override
   void initState() {
     super.initState();
 
+    askpermission();
     getCurrentPosition(context);
     getAttendanceStatus();
     getallbeat('GetShopsData').then((value) => allbeatlist(value));
+
+  }
+
+  Future<void> askpermission() async {
+
+    try{
+
+      var camerastatus = await Permissionhandler.Permission.camera.status;
+      var locationstatus = await Permissionhandler.Permission.locationWhenInUse.status;
+
+      if (camerastatus.isGranted == false || locationstatus.isGranted == false) {
+
+        Map<Permissionhandler.Permission, Permissionhandler.PermissionStatus> statuses = await [
+          Permissionhandler.Permission.location,
+          Permissionhandler.Permission.camera
+        ].request();
+
+      }
+
+      if(camerastatus.isGranted==true){
+        cstatus = true;
+        print("cstatus$cstatus");
+      }
+
+      if(locationstatus.isGranted == true){
+        lstatus = true;
+        print("lstatus$lstatus");
+      }
+
+      bool ison = await location.serviceEnabled();
+
+      if (!ison) {
+
+        bool isturnedon = await location.requestService();
+
+        if (isturnedon) {
+          gpsstatus = true;
+          print("gpsstatus$gpsstatus");
+        }else{
+          print("gpsstatus$isturnedon");
+        }
+
+      }else{
+
+        gpsstatus = true;
+
+      }
+
+    }catch(e){
+      print("gpsstatus$e");
+    }
 
   }
 
@@ -94,7 +150,6 @@ class AttendanceState extends State<Attendance>{
 
     return WillPopScope(
        child: Scaffold(
-         key: scaffoldKey2,
             appBar: AppBar(
                 backgroundColor: Colors.white,
                 leading: GestureDetector(
@@ -135,15 +190,22 @@ class AttendanceState extends State<Attendance>{
                                     GestureDetector(
                                       onTap: penabled? (){
 
-                                        final progress  = ProgressHUD.of(context);
-                                        progress?.show();
+                                        if(cstatus==false){
 
-                                     //  showdialog("P",context,beatnamelist,beatIdlist);
-                                         showdialogg("P",context,shopdata,progress,scaffoldKey2);
-                                         //
-                                         // if(present==true){
-                                         //
-                                         // }
+                                          Fluttertoast.showToast(msg: "Please allow camera permission");
+
+                                        }else if(lstatus ==false){
+
+                                          Fluttertoast.showToast(msg: "Please allow location permission");
+
+                                        }else{
+
+                                          final progress  = ProgressHUD.of(context);
+                                          progress?.show();
+
+                                          showdialogg("P",context,shopdata,progress);
+
+                                        }
 
                                       }:null,
                                       child:Container(
@@ -168,7 +230,7 @@ class AttendanceState extends State<Attendance>{
                                       onTap: eodenabled?(){
                                         final progress  = ProgressHUD.of(context);
                                         progress?.show();
-                                        showdialogg("EOD",context, shopdata,progress,scaffoldKey2);
+                                        showdialogg("EOD",context, shopdata,progress);
 
                                       // showdialogg("EOD",context,beatnamelist,beatIdlist);
                                       }:null,
@@ -200,7 +262,7 @@ class AttendanceState extends State<Attendance>{
                                       onTap: hdenabled?(){
                                         final progress  = ProgressHUD.of(context);
                                         progress?.show();
-                                        showdialogg("NOON",context,shopdata,progress,scaffoldKey2);
+                                        showdialogg("NOON",context,shopdata,progress);
                                       }:null,
 
                                       child: Container(
@@ -225,7 +287,7 @@ class AttendanceState extends State<Attendance>{
                                         final progress  = ProgressHUD.of(context);
                                         progress?.show();
 
-                                        showdialogg("WO",context,shopdata,progress,scaffoldKey2);
+                                        showdialogg("WO",context,shopdata,progress);
 
                                       }:null,
                                       child:Container(

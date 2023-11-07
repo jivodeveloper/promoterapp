@@ -8,7 +8,6 @@ import 'package:promoterapp/models/Shops.dart';
 import 'package:promoterapp/models/logindetails.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:http/http.dart' as http;
-import 'package:promoterapp/screen/Dashboard.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:promoterapp/models/saalesreport.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
@@ -143,7 +142,7 @@ Future<dynamic> getallbeat(String endpoint) async{
 
 }
 
-Future<void> markattendance(String status, String beatid,BuildContext context,File file,progress) async {
+Future<void> markattendance(String status, String beatid,context,File file,progress) async {
 
   try{
 
@@ -198,14 +197,14 @@ Future<void> markattendance(String status, String beatid,BuildContext context,Fi
     }
 
   }catch(e){
-
-    Fluttertoast.showToast(msg: "$e",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0);
+    print("$e");
+    // Fluttertoast.showToast(msg: "$e",
+    //     toastLength: Toast.LENGTH_SHORT,
+    //     gravity: ToastGravity.BOTTOM,
+    //     timeInSecForIosWeb: 1,
+    //     backgroundColor: Colors.black,
+    //     textColor: Colors.white,
+    //     fontSize: 16.0);
 
   }
 
@@ -254,12 +253,24 @@ void getuserdetails(String endpoint) async {
     SharedPrefClass.setString(PERSON_TYPE, details.personType.toString());
     SharedPrefClass.setString(PERSON_NAME, details.personName.toString());
     SharedPrefClass.setString(GROUP, details.group.toString());
+    SharedPrefClass.setString(TARGET, details.target.toString());
 
   } else {
 
     throw Exception('Failed to load data');
 
   }
+
+}
+
+Future<dynamic> checklatestversion(String endpoint,version,device) async{
+
+  int userid=0;
+  userid = SharedPrefClass.getInt(USER_ID);
+
+  var response = await http.get(Uri.parse('$IP_URL$endpoint?id=$userid&appversion=$version&device=$device'));
+  final list = jsonDecode(response.body);
+  return list;
 
 }
 
@@ -274,42 +285,64 @@ Future<dynamic> getSKU(String endpoint) async{
 
 }
 
-Future<void> savepromotersale(String salesEntry,File file,File file1,File file2,BuildContext context) async {
+Future<void> savepromotersale(String salesEntry,String file,String file1,String file2,BuildContext context,progress,dynamiclist) async {
 
-  int userid=0;
-  userid = SharedPrefClass.getInt(USER_ID);
+  try{
 
-  var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales'));
-  request.fields['salesEntry']= userid.toString();
-  request.files.add(await http.MultipartFile.fromPath('image', file.path));
-  request.files.add(await http.MultipartFile.fromPath('image1', file1.path));
-  request.files.add(await http.MultipartFile.fromPath('image2', file2.path));
+    var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales'));
+    request.fields['salesEntry']= salesEntry.toString();
+    request.files.add(await http.MultipartFile.fromPath('image', file));
+    print("file1 $file1");
+    print("file2 $file2");
+    if(file1!=""){
+      request.files.add(await http.MultipartFile.fromPath('image1', file1));
+    }else if(file2!=""){
+      request.files.add(await http.MultipartFile.fromPath('image2', file2));
+    }
 
-  var response = await request.send();
-  var responsed = await http.Response.fromStream(response);
-  final responsedData = json.decode(responsed.body);
+    var response = await request.send();
+    var responsed = await http.Response.fromStream(response);
+    final responsedData = json.decode(responsed.body);
 
-  if(response.statusCode == 200){
+    if(responsedData.contains("DONE")){
 
-    Fluttertoast.showToast(msg: responsedData.toString(),
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0);
+      progress.dismiss();
 
+      Fluttertoast.showToast(msg: responsedData.toString(),
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
 
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                Dashboard()));
+      dynamiclist.clear();
 
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  HomeScreen()));
 
-  }else{
+    }else{
 
-    Fluttertoast.showToast(msg: "Please contact admin!!",
+      progress.dismiss();
+      Fluttertoast.showToast(msg: "Please contact admin!!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+    }
+
+  }catch(e){
+
+    progress.dismiss();
+    print("$e");
+
+    Fluttertoast.showToast(msg: "$e",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,

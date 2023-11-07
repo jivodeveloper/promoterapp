@@ -20,10 +20,15 @@ void getAttendanceStatus() async {
 
   attStatus = SharedPrefClass.getString(ATT_STATUS);
 
+  print("attstatus$attStatus");
+
   if(attStatus==""){
 
     penabled = true;
     woenabled = true;
+    present = true;
+    wo =true;
+
     eod = false;
     hd = false;
     eodenabled =false;
@@ -36,12 +41,18 @@ void getAttendanceStatus() async {
     present = false;
     wo = false;
 
+    eod = true;
+    hd = true;
+    eodenabled =true;
+    hdenabled =true;
+
   }else if(attStatus=="EOD"){
 
     penabled = false;
     woenabled =false;
     eodenabled =false;
     hdenabled =false;
+
     present = false;
     eod = false;
     wo = false;
@@ -51,9 +62,10 @@ void getAttendanceStatus() async {
 
     penabled = false;
     woenabled =false;
-    eodenabled =true;
     hdenabled =false;
     present = false;
+
+    eodenabled =true;
     eod = true;
     wo = false;
     hd = false;
@@ -64,11 +76,11 @@ void getAttendanceStatus() async {
     woenabled =false;
     eodenabled =false;
     hdenabled =false;
+
     present = false;
     eod = false;
     wo = false;
     hd = false;
-    present = false;
 
   }
 
@@ -79,10 +91,12 @@ Future<bool> checkNetwork() async {
   bool isConnected = false;
 
   try {
+
     final result = await InternetAddress.lookup('google.com');
     if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
       isConnected = true;
     }
+
   } on SocketException catch (_) {
     isConnected = false;
   }
@@ -90,11 +104,12 @@ Future<bool> checkNetwork() async {
   return isConnected;
 }
 
-Future<void> showdialogg(String status,context, List<Shops> listdata,progress,scaffoldKey2) async {
+Future<void> showdialogg(String status,context, List<Shops> listdata,progress) async {
 
+  progress.dismiss();
   return showDialog(
       barrierDismissible: false,
-      context: scaffoldKey2.currentContext,
+      context: context,
       builder:(BuildContext context) {
         return AlertDialog(
           title: const Text('Attendance'),
@@ -111,26 +126,26 @@ Future<void> showdialogg(String status,context, List<Shops> listdata,progress,sc
 
             TextButton(
               onPressed: () =>
-              gettodaysbeatt(status,context,listdata,progress,scaffoldKey2),
+              gettodaysbeatt(status,context,listdata,progress),
               child: const Text('Yes'),
               ),
 
             ],
 
-          );
+         );
       }
   );
 
 }
 
-Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist,progress,scaffoldKey2) async {
+Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist,progress) async {
 
   int beatId = (SharedPrefClass.getInt(BEAT_ID)==0 ? -1 : SharedPrefClass.getInt(BEAT_ID));
 
   if(beatId==0 || beatId ==-1){
 
      //showbeat(status,context,beatnamelist,beatIdlist);
-     showbeatt(status,context,beatnamelist,progress,scaffoldKey2);
+     showbeatt(status,context,beatnamelist,progress);
 
   }else{
 
@@ -140,7 +155,7 @@ Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist,progress,sca
 
 }
 
-Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist,progress,scaffoldKey2) async {
+Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist,progress) async {
 
   if(beatnamelist.isEmpty){
 
@@ -157,9 +172,10 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
   }else{
 
     Navigator.pop(contextt);
+  //  progress.dismiss();
 
     return showDialog<void>(
-      context: scaffoldKey2.currentContext,
+      context: contextt,
       barrierDismissible: false,
       builder: (BuildContext context) {
         contextt = context;
@@ -188,7 +204,6 @@ Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatname
 
                         if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
 
-                          print("retailerId ${beatnamelist[i].retailerID!.toInt()}");
                           SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
                           selectFromCamera(status,beatnamelist[i].toString(),contextt,progress);
 
@@ -399,7 +414,7 @@ void getCurrentPosition(context) async {
     SharedPrefClass.setDouble(latitude, position.latitude);
     SharedPrefClass.setDouble(longitude, position.longitude);
 
-   // setState(() => currentPosition = position);
+   //setState(() => currentPosition = position);
     _getAddressFromLatLng(currentPosition!);
 
   }).catchError((e) {
@@ -428,6 +443,7 @@ Future<void> _getAddressFromLatLng(Position position) async {
 }
 
 Future<bool> _handleLocationPermission(context) async {
+
   bool serviceEnabled;
   LocationPermission permission;
 

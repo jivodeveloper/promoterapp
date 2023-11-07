@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:promoterapp/screen/SalesEntry.dart';
 import 'package:promoterapp/screen/SalesReport.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
-final GlobalKey<ScaffoldState> scaffoldKey2 = new GlobalKey<ScaffoldState>();
+
 class HomeScreen extends StatefulWidget{
 
   @override
@@ -70,7 +70,6 @@ class HomeScreenState extends State<HomeScreen>{
     return WillPopScope(
 
         child: Scaffold(
-          key: scaffoldKey2,
           body: [
 
             Dashboard(),
@@ -92,7 +91,6 @@ class HomeScreenState extends State<HomeScreen>{
 
               BottomNavigationBarItem(icon: Icon(Icons.home,color: app_theme), label: 'Home'),
               BottomNavigationBarItem(icon: Icon(Icons.person,color: app_theme), label: "Attendance"),
-              // BottomNavigationBarItem(icon: Icon(Icons.report,color: app_theme), label: "Sales"),
               BottomNavigationBarItem(icon: Icon(Icons.report,color: app_theme), label:"Reports"),
 
             ],

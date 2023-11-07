@@ -2,11 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:promoterapp/config/Color.dart';
 import 'package:intl/intl.dart';
+import 'package:promoterapp/config/Common.dart';
 import 'package:promoterapp/screen/LoginScreen.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/DatabaseHelper.dart';
+import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:promoterapp/models/Item.dart';
+// import 'package:package_info_plus/package_info_plus.dart';
+// import 'package:device_info_plus/device_info_plus.dart';
 
 class Dashboard extends StatefulWidget{
 
@@ -21,11 +25,17 @@ class Dashboardstate extends State<Dashboard>{
 
   TextEditingController dateController = TextEditingController();
   final DatabaseHelper dbManager = new DatabaseHelper();
+  int version=0;
+  String device="";
+  String name="";
+  List<Item> itemdata = [];
 
   @override
   void initState() {
     super.initState();
 
+  //getdevicedetails();
+    name = SharedPrefClass.getString(PERSON_NAME);
     getuserdetails('Userdetails');
 
     getSKU('GetShopsItemData').then((value) => {
@@ -34,11 +44,22 @@ class Dashboardstate extends State<Dashboard>{
 
   }
 
+  // void getdevicedetails() async{
+  //
+  //   final info = await PackageInfo.fromPlatform();
+  //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  //
+  //   device = androidInfo.model;
+  //   version = int.parse(info.version);
+  //   checklatestversion('checkLatestAppVersion',version,device);
+  //
+  // }
+
   Future<void> savelocaldb(value) async {
 
-    List<Item> itemdata = [];
     itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
-
+    await DatabaseHelper.deleteall();
     int? id = await dbManager.insertdata(itemdata);
 
   }
@@ -110,6 +131,14 @@ class Dashboardstate extends State<Dashboard>{
           Container(
             margin: EdgeInsets.only(left: 15,right: 15,top: 20),
 
+            child: Center(
+              child: Text("Welcome $name",style: TextStyle(color: Colors.black,fontSize: 18),),
+            ),
+          ),
+
+          Container(
+            margin: EdgeInsets.only(left: 15,right: 15,top: 20),
+
             decoration: const BoxDecoration(
                 color: green,
                 borderRadius: BorderRadius.all(
@@ -117,7 +146,7 @@ class Dashboardstate extends State<Dashboard>{
             ),
             height: 50,
             child: const Center(
-              child: Text("Achieved : 0.0 Ltrs",style: TextStyle(color: Colors.white,fontSize: 18),),
+              child: Text("Achieved : 0.0 LTRS",style: TextStyle(color: Colors.white,fontSize: 18),),
             ),
           ),
 
@@ -185,7 +214,7 @@ class Dashboardstate extends State<Dashboard>{
           ),
 
         ],
-      ),
+       ),
      );
    }
 
@@ -217,10 +246,10 @@ class Dashboardstate extends State<Dashboard>{
 
                 },
                 child: const Text('Yes'),
-              )
-            ],
+               )
+             ],
           ),
-    );
+       );
 
   }
 

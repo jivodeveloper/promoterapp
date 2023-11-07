@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:promoterapp/config/Common.dart';
+import 'package:promoterapp/models/Shops.dart';
 import 'package:promoterapp/models/saalesreport.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:intl/intl.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
+import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:promoterapp/util/functionhelper.dart';
 
 class SalesReport extends StatefulWidget{
@@ -22,16 +25,20 @@ class SalesReportState extends State<SalesReport>{
   String from="",to="",salesid="";
   Future<List<saalesreport>>? report;
   String? cdate;
+  List<Shops> shopdata = [];
 
   @override
   void initState() {
     super.initState();
-    cdate = getcurrentdate();
 
+    cdate = getcurrentdate();
+      
     from = cdate?? "";
     to = cdate?? "";
     getproreports(from,to);
 
+    print("retailerId ${SharedPrefClass.getInt(SHOP_ID)}");
+    
   }
 
   @override
