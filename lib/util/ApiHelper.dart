@@ -5,19 +5,20 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:promoterapp/config/Color.dart';
 import 'package:promoterapp/config/Common.dart';
 import 'package:promoterapp/models/Shops.dart';
-import 'package:promoterapp/models/logindetails.dart';
+import 'package:promoterapp/models/Logindetails.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:http/http.dart' as http;
+import 'package:promoterapp/screen/Attendance.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:promoterapp/models/saalesreport.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
 
-Future<logindetails> login(context, String user,String pass) async {
+Future<Logindetails> login(context, String user,String pass) async {
 
   final progress = ProgressHUD.of(context);
   progress?.show();
 
-  logindetails details;
+  Logindetails details;
 
   Map<String, String> headers = {
     'Content-Type': 'application/json',
@@ -27,7 +28,7 @@ Future<logindetails> login(context, String user,String pass) async {
       '${IP_URL}LoginSalesPerson?user=$user&password=$pass'),
       headers: headers);
 
-  details = logindetails.fromJson(json.decode(response.body));
+  details = Logindetails.fromJson(json.decode(response.body));
 
   try {
 
@@ -142,74 +143,6 @@ Future<dynamic> getallbeat(String endpoint) async{
 
 }
 
-Future<void> markattendance(String status, String beatid,context,File file,progress) async {
-
-  try{
-
-    int userid=0;
-    userid = SharedPrefClass.getInt(USER_ID);
-
-    var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}AddSalesPersonAttendance'));
-    request.fields['personId']= userid.toString();
-    request.fields['status']= status;
-    request.fields['latitude']= SharedPrefClass.getDouble(latitude).toString();
-    request.fields['longitude']= SharedPrefClass.getDouble(longitude).toString();
-    request.files.add(await http.MultipartFile.fromPath('image', file.path));
-
-    var response = await request.send();
-    var responsed = await http.Response.fromStream(response);
-    final responsedData = json.decode(responsed.body);
-
-    if(response.statusCode == 200){
-
-      Fluttertoast.showToast(msg: responsedData.toString(),
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0);
-
-      if(responsedData.contains("DONE")){
-
-        progress.dismiss();
-        present = true;
-        wo = true;
-
-      }
-
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  HomeScreen()));
-
-    }else{
-
-      Fluttertoast.showToast(msg: "Please contact admin!!",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0);
-
-    }
-
-  }catch(e){
-    print("$e");
-    // Fluttertoast.showToast(msg: "$e",
-    //     toastLength: Toast.LENGTH_SHORT,
-    //     gravity: ToastGravity.BOTTOM,
-    //     timeInSecForIosWeb: 1,
-    //     backgroundColor: Colors.black,
-    //     textColor: Colors.white,
-    //     fontSize: 16.0);
-
-  }
-
-
-}
 
 Future<List<saalesreport>> getreports(String endpoint,String from,String to) async {
 
@@ -234,18 +167,22 @@ Future<List<saalesreport>> getreports(String endpoint,String from,String to) asy
 
 }
 
-void getuserdetails(String endpoint) async {
+Future<Logindetails> getuserdetails(String endpoint) async {
 
   int userid=0;
 
-  logindetails details;
+  Logindetails details;
+ // List<Logindetails> details = [];
   userid = SharedPrefClass.getInt(USER_ID);
 
   var response = await http.post(Uri.parse('$IP_URL$endpoint?userId=$userid'));
+  final list = jsonDecode(response.body);
 
   if (response.statusCode == 200) {
 
-    details = logindetails.fromJson(json.decode(response.body));
+    details = Logindetails.fromJson(json.decode(response.body));
+
+  //  details = list.map<Logindetails>((m) => Logindetails.fromJson(Map<String, dynamic>.from(m))).toList();
 
     SharedPrefClass.setString(ATT_STATUS,details.attStatus.toString());
     SharedPrefClass.setInt(DISTANCE_ALLOWED,details.distanceAllowed!.toInt());
@@ -254,13 +191,14 @@ void getuserdetails(String endpoint) async {
     SharedPrefClass.setString(PERSON_NAME, details.personName.toString());
     SharedPrefClass.setString(GROUP, details.group.toString());
     SharedPrefClass.setString(TARGET, details.target.toString());
-
+    print("${details.target.toString()}");
   } else {
 
     throw Exception('Failed to load data');
 
   }
 
+  return details;
 }
 
 Future<dynamic> checklatestversion(String endpoint,version,device) async{
@@ -289,11 +227,11 @@ Future<void> savepromotersale(String salesEntry,String file,String file1,String 
 
   try{
 
-    var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales'));
+    print("Sales entry ${salesEntry.toString()}");
+    var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales2'));
     request.fields['salesEntry']= salesEntry.toString();
     request.files.add(await http.MultipartFile.fromPath('image', file));
-    print("file1 $file1");
-    print("file2 $file2");
+
     if(file1!=""){
       request.files.add(await http.MultipartFile.fromPath('image1', file1));
     }else if(file2!=""){

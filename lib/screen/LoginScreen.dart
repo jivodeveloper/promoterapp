@@ -7,7 +7,9 @@ import 'package:promoterapp/util/functionhelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
+bool cstatus = false,lstatus =false;
 class LoginScreen extends StatefulWidget {
 
   @override
@@ -75,7 +77,7 @@ class LoginScreenState extends State<LoginScreen> {
                                           ),
                                         ),
 
-                                        const Align(
+                                        Align(
                                             alignment: Alignment.centerLeft,
                                             child: Text(
                                               "LOGIN", style: TextStyle(
@@ -83,7 +85,7 @@ class LoginScreenState extends State<LoginScreen> {
                                               color: Color(0xFF063A06),
                                               fontSize: 30,
                                              ),
-                                            )
+                                           )
                                          )
 
                                       ],
@@ -97,8 +99,7 @@ class LoginScreenState extends State<LoginScreen> {
                                         children: [
 
                                           Container(
-                                            margin: EdgeInsets.fromLTRB(
-                                                10, 20, 10, 10),
+                                            margin: EdgeInsets.fromLTRB(10, 20, 10, 10),
                                             decoration: BoxDecoration(
                                                 border: Border.all(
                                                     color: Color(0xFFEFE4E4))
@@ -150,19 +151,35 @@ class LoginScreenState extends State<LoginScreen> {
                                             ),
                                           )
 
-                                        ],
+                                         ],
                                       )
                                   ),
 
                                   GestureDetector(
 
                                     onTap: () async {
-                                      login(ctx, usercontroller.text,passcontroller.text);
+
+                                      print("$cstatus $lstatus");
+                                     // if(cstatus == true && lstatus == true){
+
+                                        login(ctx, usercontroller.text,passcontroller.text);
+
+                                      // }else if(cstatus==false || lstatus == false){
+                                      //
+                                      //   Fluttertoast.showToast(msg: "Please allow permission",
+                                      //       toastLength: Toast.LENGTH_SHORT,
+                                      //       gravity: ToastGravity.BOTTOM,
+                                      //       timeInSecForIosWeb: 1,
+                                      //       backgroundColor: Colors.black,
+                                      //       textColor: Colors.white,
+                                      //       fontSize: 16.0);
+                                      //
+                                      // }
+
                                     },
 
                                     child: Container(
-                                      margin: EdgeInsets.only(
-                                          left: 10, top: 40, right: 10, bottom: 10),
+                                      margin: EdgeInsets.only(left: 10, top: 40, right: 10, bottom: 10),
                                       width: double.infinity,
                                       height: 55,
                                       decoration: const BoxDecoration(
@@ -183,11 +200,10 @@ class LoginScreenState extends State<LoginScreen> {
                                   )
 
                                 ],
-
                               ),
                             ),
                           ),
-                        ),
+                       ),
                     ),
                 )
             )
@@ -214,7 +230,6 @@ class LoginScreenState extends State<LoginScreen> {
 
               TextButton(
                 onPressed: () async {
-
 
                   SharedPreferences preferences = await SharedPreferences
                       .getInstance();

@@ -1,6 +1,6 @@
-class logindetails {
+class Logindetails {
 
-  logindetails({
+  Logindetails({
     required this.personId,
     required this.personType,
     required this.personName,
@@ -25,7 +25,7 @@ class logindetails {
   int? distanceAllowed;
   String? attStatus;
 
-  logindetails.fromJson(Map<String, dynamic> json) {
+  Logindetails.fromJson(Map<String, dynamic> json) {
     personId = json['personID'];
     personType = json['personType'];
     personName = json['personName'];

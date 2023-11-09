@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:promoterapp/config/Color.dart';
 import 'package:intl/intl.dart';
 import 'package:promoterapp/config/Common.dart';
+import 'package:promoterapp/models/Logindetails.dart';
 import 'package:promoterapp/screen/LoginScreen.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/DatabaseHelper.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:promoterapp/models/Item.dart';
-// import 'package:package_info_plus/package_info_plus.dart';
-// import 'package:device_info_plus/device_info_plus.dart';
+import 'package:promoterapp/screen/SalesEntry.dart';
 
 class Dashboard extends StatefulWidget{
 
@@ -29,16 +29,28 @@ class Dashboardstate extends State<Dashboard>{
   String device="";
   String name="";
   List<Item> itemdata = [];
+ // Logindetails? logindetails ;
+  bool _isLoading = false;
+  Future<Logindetails>? userdetails;
 
   @override
   void initState() {
     super.initState();
 
-  //getdevicedetails();
+    _isLoading = true;
+    //getdevicedetails();
     name = SharedPrefClass.getString(PERSON_NAME);
-    getuserdetails('Userdetails');
+    userdetails = getuserdetails('Userdetails');
+    Future.delayed(const Duration(milliseconds: 600), () {
+
+      setState(() {
+        _isLoading = false;
+      });
+
+    });
 
     getSKU('GetShopsItemData').then((value) => {
+
       savelocaldb(value)
     });
 
@@ -70,24 +82,22 @@ class Dashboardstate extends State<Dashboard>{
       appBar: AppBar(
           automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
-          title: Container(
-            child: Row(
-              children: [
+          title:Row(
+            children: [
 
-                Expanded(
-                  flex:1,
-                  child:Image.asset('assets/Images/jivo_logo.png',width: 40,height: 40,),
-                ),
+              Expanded(
+                flex:1,
+                child:Image.asset('assets/Images/jivo_logo.png',width: 40,height: 40,),
+              ),
 
-                Expanded(
-                  flex:12,
-                  child: const Text("  Dashboard", style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400,fontSize: 21)),
-                )
+              Expanded(
+                flex:12,
+                child: const Text("  Dashboard", style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400,fontSize: 21)),
+              )
 
-              ],
-            )
+            ],
           ),
-          actions: [
+         actions: [
 
             IconButton(
               icon: Image.asset(
@@ -98,8 +108,10 @@ class Dashboardstate extends State<Dashboard>{
             )
 
           ],
-      ),
-      body:Column(
+       ),
+      body: _isLoading?const Center(
+          child:CircularProgressIndicator()
+      ):Column(
         children: [
 
           Container(
@@ -118,9 +130,17 @@ class Dashboardstate extends State<Dashboard>{
 
                 Expanded(
                     flex: 1,
-                    child: Container(
-                      margin: EdgeInsets.only(left: 10),
-                      child: const Text("0.0 Ltrs",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 20),),
+                    child: FutureBuilder<Logindetails>(
+                      future: userdetails,
+                      builder:(context,snapshot){
+                          if(snapshot.hasData){
+                            return Container(
+                              margin: EdgeInsets.only(left: 10),
+                              child: Text("${snapshot.data?.target} Ltrs",style: TextStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 20),),
+                            );
+                          }
+                          return Container();
+                      },
                     )
                 ),
 
@@ -215,6 +235,23 @@ class Dashboardstate extends State<Dashboard>{
 
         ],
        ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.green,
+        onPressed: () {
+          setState(() {
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        SalesEntry()));
+
+          });
+        },
+        child: Icon(Icons.add),
+
+      ),
      );
    }
 

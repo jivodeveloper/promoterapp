@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:location/location.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +10,13 @@ import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/functionhelper.dart';
 import '../config/Common.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import '../util/Shared_pref.dart';
 import 'HomeScreen.dart';
 import 'package:permission_handler/permission_handler.dart' as Permissionhandler;
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 class Attendance extends StatefulWidget{
 
@@ -31,7 +39,8 @@ class AttendanceState extends State<Attendance>{
   List<Shops> shopdata = [];
   bool cstatus = false ,lstatus =false,gpsstatus=false;
   Location location = new Location();
-
+  Timer? timer;
+  
   @override
   void initState() {
     super.initState();
@@ -41,6 +50,12 @@ class AttendanceState extends State<Attendance>{
     getAttendanceStatus();
     getallbeat('GetShopsData').then((value) => allbeatlist(value));
 
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
   }
 
   Future<void> askpermission() async {
@@ -173,7 +188,7 @@ class AttendanceState extends State<Attendance>{
             ):
             ProgressHUD(
                 child:Builder(
-                    builder: (context) => Scaffold(
+                    builder: (ctx) => Scaffold(
                         body: SizedBox(
                           width: double.infinity,
                           height: double.infinity,
@@ -200,10 +215,18 @@ class AttendanceState extends State<Attendance>{
 
                                         }else{
 
-                                          final progress  = ProgressHUD.of(context);
+                                          final progress  = ProgressHUD.of(ctx);
                                           progress?.show();
 
                                           showdialogg("P",context,shopdata,progress);
+
+                                          timer = Timer.periodic(Duration(seconds: 2), (Timer t) => {
+
+                                            if(progress!.activate()){
+
+                                            }
+
+                                          });
 
                                         }
 
@@ -228,11 +251,11 @@ class AttendanceState extends State<Attendance>{
                                     GestureDetector(
 
                                       onTap: eodenabled?(){
-                                        final progress  = ProgressHUD.of(context);
-                                        progress?.show();
-                                        showdialogg("EOD",context, shopdata,progress);
 
-                                      // showdialogg("EOD",context,beatnamelist,beatIdlist);
+                                        final progress  = ProgressHUD.of(ctx);
+                                        progress?.show();
+                                        showdialogg("EOD",ctx, shopdata,progress);
+
                                       }:null,
 
                                       child:Container(
@@ -260,9 +283,23 @@ class AttendanceState extends State<Attendance>{
 
                                     GestureDetector(
                                       onTap: hdenabled?(){
-                                        final progress  = ProgressHUD.of(context);
-                                        progress?.show();
-                                        showdialogg("NOON",context,shopdata,progress);
+
+                                          if(cstatus==false){
+
+                                             Fluttertoast.showToast(msg: "Please allow camera permission");
+
+                                          }else if(lstatus ==false){
+
+                                              Fluttertoast.showToast(msg: "Please allow location permission");
+
+                                          }else{
+
+                                            final progress  = ProgressHUD.of(ctx);
+                                            progress?.show();
+                                            showdialogg("NOON",ctx,shopdata,progress);
+
+                                          }
+
                                       }:null,
 
                                       child: Container(
@@ -284,11 +321,20 @@ class AttendanceState extends State<Attendance>{
 
                                     GestureDetector(
                                       onTap:woenabled? (){
-                                        final progress  = ProgressHUD.of(context);
+                                        final progress  = ProgressHUD.of(ctx);
                                         progress?.show();
 
-                                        showdialogg("WO",context,shopdata,progress);
+                                        showdialogg("WO",ctx,shopdata,progress);
 
+                                        try{
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (ctx) =>
+                                                      HomeScreen()));
+                                        }catch(e){
+                                          print("print image $e");
+                                        }
                                       }:null,
                                       child:Container(
                                         height: 100,
@@ -311,13 +357,12 @@ class AttendanceState extends State<Attendance>{
 
                                 ),
 
-                            ]
+                              ]
 
                           ),
                         )
                     )
                 )
-
             )
         ),
         onWillPop: () {
@@ -339,183 +384,253 @@ class AttendanceState extends State<Attendance>{
 
   }
 
-  // Future<bool> _handleLocationPermission(progress) async {
-  //   bool serviceEnabled;
-  //   LocationPermission permission;
-  //   serviceEnabled = await Geolocator.isLocationServiceEnabled();
-  //   if (!serviceEnabled) {
-  //     return false;
-  //   }
-  //   permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied) {
-  //     permission = await Geolocator.requestPermission();
-  //     if (permission == LocationPermission.denied) {
-  //       return false;
-  //     }
-  //   }
-  //   if (permission == LocationPermission.deniedForever) {
-  //     return false;
-  //   }
-  //   progress?.dismiss();
-  //   return true;
-  // }
-  //
-  // Future<void> showdilaog(String status) async {
-  //   return showDialog(
-  //       context: context,
-  //       builder:(BuildContext context) {
-  //         return AlertDialog(
-  //           title: const Text('Attendance'),
-  //           content: const Text('Are you really present?'),
-  //           actions: <Widget>[
-  //             TextButton(
-  //               onPressed: () => Navigator.pop(context, 'Cancel'),
-  //               child: const Text('No'),
-  //             ),
-  //             TextButton(
-  //               onPressed: () =>
-  //
-  //                   gettodaysbeat(status,context),
-  //               child: const Text('Yes'),
-  //             ),
-  //           ],
-  //         );
-  //       }
-  //   );
-  // }
-  //
-  // Future<void> showbeat(String status,BuildContext contextt) async {
-  //
-  //   if(beatnamelist.length == 0){
-  //
-  //     Navigator.pop(contextt);
-  //     Fluttertoast.showToast(msg: "You don't have any beat! \n Please contact admin",
-  //         toastLength: Toast.LENGTH_SHORT,
-  //         gravity: ToastGravity.BOTTOM,
-  //         timeInSecForIosWeb: 1,
-  //         backgroundColor: Colors.black,
-  //         textColor: Colors.white,
-  //         fontSize: 16.0);
-  //
-  //   }else{
-  //
-  //     Navigator.pop(contextt);
-  //     return showDialog<void>(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (BuildContext context) {
-  //         contextt = context;
-  //         return AlertDialog(
-  //           title: const Text('Select Beat'),
-  //           content:ListView.builder(
-  //               shrinkWrap: true,
-  //               itemCount: beatnamelist.length,
-  //               itemBuilder: (context,i){
-  //                 return GestureDetector(
-  //                     onTap: (){
-  //
-  //                       markattendance(status,beatnamelist[i].toString(),contextt);
-  //                     },
-  //                     child: Container(
-  //                       padding:EdgeInsets.all(10),
-  //                       child: Text("${beatnamelist[i]}"),
-  //                     )
-  //                 );
-  //               }
-  //           ),
-  //         );
-  //       },
-  //     );
-  //
-  //   }
-  // }
-  //
-  // Future<void> markattendance(String status, String beatname,BuildContext context) async {
-  //
-  //   Navigator.pop(context);
-  //   for(int i=0;i<beatnamelist.length;i++){
-  //     if(beatname == beatnamelist[i]){
-  //       beatId = beatIdlist[i];
-  //
-  //     }
-  //   }
-  //
-  //   Map<String, String> headers = {
-  //     'Content-Type': 'application/json',
-  //   };
-  //
-  //   var response = await http.post(Uri.parse('${IP_URL}AddSalesPersonAttendanceV3?personId=$userid&status=$status&latitude=$lat&longitude=$lng&beatId=$beatId'), headers: headers);
-  //
-  //   if(response.statusCode == 200){
-  //
-  //     if(response.body=="DONE"){
-  //
-  //       setState(() {
-  //         present = true;
-  //         wo = true;
-  //       });
-  //
-  //     }
-  //
-  //     Fluttertoast.showToast(msg: response.body.toString(),
-  //         toastLength: Toast.LENGTH_SHORT,
-  //         gravity: ToastGravity.BOTTOM,
-  //         timeInSecForIosWeb: 1,
-  //         backgroundColor: Colors.black,
-  //         textColor: Colors.white,
-  //         fontSize: 16.0);
-  //
-  //     Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //             builder: (context) =>
-  //                 HomeScreen(personName:"")));
-  //
-  //   }else{
-  //
-  //     Fluttertoast.showToast(msg: "Please contact admin!!",
-  //         toastLength: Toast.LENGTH_SHORT,
-  //         gravity: ToastGravity.BOTTOM,
-  //         timeInSecForIosWeb: 1,
-  //         backgroundColor: Colors.black,
-  //         textColor: Colors.white,
-  //         fontSize: 16.0);
-  //
-  //   }
-  //
-  // }
-  //
-  // Future<void> gettodaysbeat(status,context) async {
-  //
-  //   SharedPreferences prefs= await SharedPreferences.getInstance();
-  //   beatId = (prefs.getInt(BEAT_ID)==0? -1 :prefs.getInt(BEAT_ID))!;
-  //
-  //   if(beatId==0 || beatId ==-1){
-  //
-  //     showbeat(status,context);
-  //
-  //   }else{
-  //
-  //     markattendance(status,beatId.toString(),context);
-  //
-  //   }
-  //
-  // }
-  //
-  // Future<void> getallbeat() async {
-  //
-  //   try {
-  //
-  //     final data = await getallshops('syncAllData2');
-  //     print('API response: $data');
-  //
-  //   } catch (e) {
-  //
-  //     print('Error fetching data: $e');
-  //
-  //   }
-  //
-  // }
+  Future<void> showdialogg(String status,BuildContext ctx, List<Shops> listdata,progress) async {
+
+
+    return showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder:(BuildContext context) {
+          return AlertDialog(
+            title: const Text('Attendance'),
+            content: const Text('Are you really present?'),
+            actions: <Widget>[
+
+              TextButton(
+                onPressed: () => {
+                  Navigator.pop(context, 'Cancel'),
+                  progress!.dismiss()
+                },
+                child: const Text('No'),
+              ),
+
+              TextButton(
+                onPressed: () =>{
+                  // Navigator.pop(context),
+                  gettodaysbeatt(status,ctx,listdata,progress),
+                },
+
+                child: const Text('Yes'),
+              ),
+
+            ],
+
+          );
+
+        }
+
+    );
+
+  }
+
+  Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist,progress) async {
+
+    int beatId = (SharedPrefClass.getInt(BEAT_ID)==0 ? -1 : SharedPrefClass.getInt(BEAT_ID));
+
+    if(beatId==0 || beatId ==-1){
+
+      //showbeat(status,context,beatnamelist,beatIdlist);
+      showbeatt(status,context,beatnamelist,progress);
+
+    }else{
+
+      markattendance(status,beatId.toString(),context,"" as File,progress);
+
+    }
+
+  }
+
+  Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist,progress) async {
+
+    if(beatnamelist.isEmpty){
+
+      Navigator.pop(contextt);
+
+      Fluttertoast.showToast(msg: "You don't have any beat! \n Please contact admin",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+    }else{
+
+      Navigator.pop(contextt);
+      //  progress.dismiss();
+
+      return showDialog<void>(
+        context: contextt,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          contextt = context;
+          return AlertDialog(
+            title: const Text('Select Shop'),
+            content:ListView.builder(
+                shrinkWrap: true,
+                itemCount: beatnamelist.length,
+                itemBuilder: (context,i){
+                  return GestureDetector(
+
+                      onTap: (){
+
+                        Navigator.pop(contextt);
+                        if(SharedPrefClass.getDouble(latitude)==0.0){
+
+                          Fluttertoast.showToast(msg: "Please check your connection!",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.black,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+
+                        }else{
+
+                          if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
+
+                            SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
+                            selectFromCamera(status,beatnamelist[i].toString(),contextt,progress);
+
+                          }else{
+
+                            Fluttertoast.showToast(msg: "Too far from store!",
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.BOTTOM,
+                                timeInSecForIosWeb: 1,
+                                backgroundColor: Colors.black,
+                                textColor: Colors.white,
+                                fontSize: 16.0);
+
+                          }
+
+                        }
+
+                      },
+                      child: Container(
+                        padding:EdgeInsets.all(10),
+                        child: Text("${beatnamelist[i].retailerName}"),
+                      )
+                  );
+                }
+            ),
+          );
+        },
+      );
+
+    }
+
+  }
+
+  selectFromCamera(String status, String beatid,BuildContext contextt,progress) async {
+
+    var camerastatus = await Permissionhandler.Permission.camera.status;
+
+    if(camerastatus.isDenied == true){
+
+      Fluttertoast.showToast(msg: "Please allow camera permission!",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+      Map<Permissionhandler.Permission, Permissionhandler.PermissionStatus> statuses = await [
+        Permissionhandler.Permission.camera
+      ].request();
+
+    }else{
+
+      try{
+
+        File? f;
+        int userid=0;
+        userid = SharedPrefClass.getInt(USER_ID);
+
+        final cameraFile= await ImagePicker().pickImage(source: ImageSource.camera,imageQuality: 50);
+
+        final now = new DateTime.now();
+        String dir = path.dirname(cameraFile!.path);
+        String newPath = path.join(dir,("$userid-${now.day}-${now.month}-${now.year}-${now.hour}${now.minute}${now.second}.jpg"));
+        f = await File(cameraFile.path).copy(newPath);
+
+        markattendance(status,beatid,contextt,f,progress);
+
+      }catch(e){
+
+        print('Failed to pick image: $e');
+
+      }
+
+    }
+
+  }
+
+
+  Future<void> markattendance(String status, String beatid,BuildContext context,File file,progress) async {
+
+    try{
+
+      int userid=0;
+      userid = SharedPrefClass.getInt(USER_ID);
+
+      var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}AddSalesPersonAttendance'));
+      request.fields['personId']= userid.toString();
+      request.fields['status']= status;
+      request.fields['latitude']= SharedPrefClass.getDouble(latitude).toString();
+      request.fields['longitude']= SharedPrefClass.getDouble(longitude).toString();
+      request.files.add(await http.MultipartFile.fromPath('image', file.path));
+
+      var response = await request.send();
+      var responsed = await http.Response.fromStream(response);
+      final responsedData = json.decode(responsed.body);
+
+      if(response.statusCode == 200){
+
+        Fluttertoast.showToast(msg: responsedData.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0);
+
+        if(responsedData.contains("DONE")){
+
+          progress.dismiss();
+
+         // final currentContext = context;
+
+        }
+
+      }else{
+
+        Fluttertoast.showToast(msg: "Please contact admin!!",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 1,
+            backgroundColor: Colors.black,
+            textColor: Colors.white,
+            fontSize: 16.0);
+
+      }
+
+    }catch(e){
+
+      print("print image $e");
+      Fluttertoast.showToast(msg: "$e",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+    }
+
+
+  }
 
 }
 

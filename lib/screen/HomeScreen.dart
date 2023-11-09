@@ -27,17 +27,23 @@ class HomeScreenState extends State<HomeScreen>{
   @override
   void initState() {
 
-    Future.delayed(const Duration(seconds: 10), () {
-      setState(() {
+    // Future.delayed(const Duration(seconds: 10), () {
+    //   setState(() {
+    //
+    //    String val= SharedPrefClass.getString(ATT_STATUS);
+    //
+    //   });
 
-       String val= SharedPrefClass.getString(ATT_STATUS);
-
-      });
-
-    });
+    // });
 
     super.initState();
   }
+
+  // @override
+  // void dispose() {
+  //   timer.cancel();
+  //   super.dispose();
+  // }
 
   void logout(BuildContext ctx) {
 
@@ -94,24 +100,6 @@ class HomeScreenState extends State<HomeScreen>{
               BottomNavigationBarItem(icon: Icon(Icons.report,color: app_theme), label:"Reports"),
 
             ],
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-          floatingActionButton: FloatingActionButton(
-            backgroundColor: Colors.green,
-            onPressed: () {
-              setState(() {
-
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            SalesEntry()));
-
-              });
-            },
-            child: Icon(Icons.add),
-
-
           ),
 
         ),

@@ -457,7 +457,6 @@ class SalesEntryState extends State<SalesEntry>{
             )
           ),
           onWillPop:() async{
-
           dynamicList.clear();
 
             Navigator.push(
@@ -558,6 +557,9 @@ class SalesEntryState extends State<SalesEntry>{
 
               print("third");
               savepromotersale(body.toString(), f!.path.toString(), f1!.path.toString(),"", context, progress,dynamicList);
+
+            }else{
+              savepromotersale(body.toString(), f!.path.toString(), f1!.path.toString(),f2!.path.toString(), context, progress,dynamicList);
             }
 
           //  savepromotersale(body.toString(), f!.path.toString(), f1!.path.toString(),"", context, progress);

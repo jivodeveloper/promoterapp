@@ -247,7 +247,7 @@ class SalesReportState extends State<SalesReport>{
 
   void getproreports(String from,String to){
 
-    report = getreports('getPromoterTodaySale',from,to);
+    report = getreports('getPromoterTodaySale2',from,to);
 
   }
 

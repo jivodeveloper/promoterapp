@@ -72,15 +72,15 @@ class MyWidget extends StatelessWidget{
                                 )
                             ),
 
-                            Expanded(
-                                flex: 1,
-                                child:GestureDetector(
-                                  onTap: (){
-                                    // dynamicList.remove(MyWidget("",0,""));
-                                  },
-                                  child: Image.asset('assets/Images/close.png',width: 20,height: 20,),
-                                )
-                            ),
+                            // Expanded(
+                            //     flex: 1,
+                            //     child:GestureDetector(
+                            //       onTap: (){
+                            //         // dynamicList.remove(MyWidget("",0,""));
+                            //       },
+                            //       child: Image.asset('assets/Images/close.png',width: 20,height: 20,),
+                            //     )
+                            // ),
 
                           ]
 
