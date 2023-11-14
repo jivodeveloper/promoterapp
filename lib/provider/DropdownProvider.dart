@@ -4,6 +4,7 @@ class DropdownProvider extends ChangeNotifier{
 
   List<int> SKUid= [];
   List<int> selectedpieces= [];
+  List<num> selectedquantity= [];
 
   /*add category*/
   void addDropdownOptions(int index,String option){
@@ -12,14 +13,20 @@ class DropdownProvider extends ChangeNotifier{
   }
 
   /*add item*/
-  void additemdropdown(int index,int pcs,int schemeid){
+  void additemdropdown(int index,int pcs,int schemeid,num quanity){
 
     if (selectedpieces.asMap().containsKey(index)) {
+
       selectedpieces[index] = pcs;
       SKUid[index] = schemeid;
+      selectedquantity[index] = quanity;
+
     } else {
+
       selectedpieces.insert(index,pcs);
       SKUid.insert(index,schemeid);
+      selectedquantity.insert(index,quanity);
+
     }
 
     notifyListeners();
@@ -30,7 +37,7 @@ class DropdownProvider extends ChangeNotifier{
 
     SKUid.clear();
     selectedpieces.clear();
-
+    selectedquantity.clear();
     notifyListeners();
   }
 

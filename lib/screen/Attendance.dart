@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:location/location.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +8,6 @@ import 'package:promoterapp/models/Shops.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/functionhelper.dart';
 import '../config/Common.dart';
-import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import '../util/Shared_pref.dart';
 import 'HomeScreen.dart';
 import 'package:permission_handler/permission_handler.dart' as Permissionhandler;
@@ -40,7 +38,7 @@ class AttendanceState extends State<Attendance>{
   bool cstatus = false ,lstatus =false,gpsstatus=false;
   Location location = new Location();
   Timer? timer;
-  
+
   @override
   void initState() {
     super.initState();
@@ -91,10 +89,14 @@ class AttendanceState extends State<Attendance>{
         bool isturnedon = await location.requestService();
 
         if (isturnedon) {
+
           gpsstatus = true;
           print("gpsstatus$gpsstatus");
+
         }else{
+
           print("gpsstatus$isturnedon");
+
         }
 
       }else{
@@ -186,182 +188,258 @@ class AttendanceState extends State<Attendance>{
             body:_isLoading?const Center(
                 child:CircularProgressIndicator()
             ):
-            ProgressHUD(
-                child:Builder(
-                    builder: (ctx) => Scaffold(
-                        body: SizedBox(
-                          width: double.infinity,
-                          height: double.infinity,
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
+            Scaffold(
+                body: SizedBox(
+                  width: double.infinity,
+                  height: double.infinity,
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
 
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children:[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children:[
 
-                                    GestureDetector(
-                                      onTap: penabled? (){
+                            GestureDetector(
+                              onTap: penabled? (){
 
-                                        if(cstatus==false){
+                                if(cstatus==false){
 
-                                          Fluttertoast.showToast(msg: "Please allow camera permission");
+                                  Fluttertoast.showToast(msg: "Please allow camera permission");
 
-                                        }else if(lstatus ==false){
+                                }else if(lstatus ==false){
 
-                                          Fluttertoast.showToast(msg: "Please allow location permission");
+                                  Fluttertoast.showToast(msg: "Please allow location permission");
 
-                                        }else{
+                                }else{
 
-                                          final progress  = ProgressHUD.of(ctx);
-                                          progress?.show();
+                                  // final progress  = ProgressHUD.of(ctx);
+                                  // progress?.show();
+                                  _isLoading = true ;
+                                  showdialogg("P",context,shopdata,progress);
 
-                                          showdialogg("P",context,shopdata,progress);
+                                  // timer = Timer.periodic(Duration(seconds: 2), (Timer t) => {
+                                  //
+                                  //   if(!_isLoading){
+                                  //
+                                  //     Navigator.push(
+                                  //     context,
+                                  //     MaterialPageRoute(
+                                  //         builder: (contextt) =>
+                                  //             HomeScreen())),
+                                  //     timer?.cancel()
+                                  //
+                                  //   }
+                                  //
+                                  // });
 
-                                          timer = Timer.periodic(Duration(seconds: 2), (Timer t) => {
+                                }
 
-                                            if(progress!.activate()){
-
-                                            }
-
-                                          });
-
-                                        }
-
-                                      }:null,
-                                      child:Container(
-                                        height: 100,
-                                        width: 100,
-                                        margin: EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color:  present ? const Color(0xff0e0e0e) : Colors.grey,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Center(
-                                            child:Text(
-                                              "PRESENT",
-                                              style: TextStyle(color:Colors.white),
-                                           )
-                                        ),
-                                      ),
-                                    ),
-
-                                    GestureDetector(
-
-                                      onTap: eodenabled?(){
-
-                                        final progress  = ProgressHUD.of(ctx);
-                                        progress?.show();
-                                        showdialogg("EOD",ctx, shopdata,progress);
-
-                                      }:null,
-
-                                      child:Container(
-                                        height: 100,
-                                        width: 100,
-                                        margin: EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: eod ? const Color(0xff0e0e0e):Colors.grey,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Center(
-                                            child:Text("END OF DAY",style: TextStyle(color: Colors.white),)
-                                        ),
-                                      ),
-
-                                    ),
-
-                                  ],
+                              }:null,
+                              child:Container(
+                                height: 100,
+                                width: 100,
+                                margin: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color:  present ? const Color(0xff0e0e0e) : Colors.grey,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children:[
-
-                                    GestureDetector(
-                                      onTap: hdenabled?(){
-
-                                          if(cstatus==false){
-
-                                             Fluttertoast.showToast(msg: "Please allow camera permission");
-
-                                          }else if(lstatus ==false){
-
-                                              Fluttertoast.showToast(msg: "Please allow location permission");
-
-                                          }else{
-
-                                            final progress  = ProgressHUD.of(ctx);
-                                            progress?.show();
-                                            showdialogg("NOON",ctx,shopdata,progress);
-
-                                          }
-
-                                      }:null,
-
-                                      child: Container(
-                                        height: 100,
-                                        width: 100,
-                                        margin: EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: hd ?  const Color(0xff0e0e0e) : Colors.grey,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Center(
-                                            child: Text("MID DAY",style: TextStyle(
-                                                color: Colors.white
-                                            ),
-                                            )
-                                        ),
-                                      ),
-                                    ),
-
-                                    GestureDetector(
-                                      onTap:woenabled? (){
-                                        final progress  = ProgressHUD.of(ctx);
-                                        progress?.show();
-
-                                        showdialogg("WO",ctx,shopdata,progress);
-
-                                        try{
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (ctx) =>
-                                                      HomeScreen()));
-                                        }catch(e){
-                                          print("print image $e");
-                                        }
-                                      }:null,
-                                      child:Container(
-                                        height: 100,
-                                        width: 100,
-                                        margin: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: wo ?  const Color(0xff0e0e0e):Colors.grey,
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: const Center(
-                                            child: Text("WEEK OFF",style: TextStyle(
-                                                color: Colors.white
-                                            ),
-                                          )
-                                        ),
-                                      ),
+                                child: const Center(
+                                    child:Text(
+                                      "PRESENT",
+                                      style: TextStyle(color:Colors.white),
                                     )
-
-                                  ],
-
                                 ),
+                              ),
+                            ),
 
-                              ]
+                            GestureDetector(
 
+                              onTap: eodenabled?(){
+
+                                // final progress  = ProgressHUD.of(context);
+                                // progress?.show();
+                                _isLoading = true;
+                                showdialogg("EOD",context, shopdata,progress);
+                                // timer = Timer.periodic(Duration(seconds: 2), (Timer t) => {
+                                //
+                                //   if(!_isLoading){
+                                //
+                                //     Navigator.push(
+                                //         context,
+                                //         MaterialPageRoute(
+                                //             builder: (contextt) =>
+                                //                 HomeScreen())),
+                                //     timer?.cancel()
+                                //   }
+                                //
+                                // });
+                              }:null,
+
+                              child:Container(
+                                height: 100,
+                                width: 100,
+                                margin: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: eod ? const Color(0xff0e0e0e):Colors.grey,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Center(
+                                    child:Text("END OF DAY",style: TextStyle(color: Colors.white),)
+                                ),
+                              ),
+
+                            ),
+
+                          ],
+                        ),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children:[
+
+                            GestureDetector(
+                              onTap: hdenabled?(){
+
+                                if(cstatus==false){
+
+                                  Fluttertoast.showToast(msg: "Please allow camera permission");
+
+                                }else if(lstatus ==false){
+
+                                  Fluttertoast.showToast(msg: "Please allow location permission");
+
+                                }else{
+
+                                  _isLoading = true;
+                                  // final progress  = ProgressHUD.of(context);
+                                  // progress?.show();
+                                  showdialogg("NOON",context,shopdata,progress);
+
+                                  // timer = Timer.periodic(Duration(seconds: 1), (Timer t) => {
+                                  //
+                                  //   if(!_isLoading){
+                                  //
+                                  //     Navigator.push(
+                                  //         context,
+                                  //         MaterialPageRoute(
+                                  //             builder: (context) =>
+                                  //                 HomeScreen())),
+                                  //     timer?.cancel()
+                                  //   }
+                                  //
+                                  // });
+                                }
+
+                              }:null,
+
+                              child: Container(
+                                height: 100,
+                                width: 100,
+                                margin: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: hd ?  const Color(0xff0e0e0e) : Colors.grey,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Center(
+                                    child: Text("MID DAY",style: TextStyle(
+                                        color: Colors.white
+                                    ),
+                                    )
+                                ),
+                              ),
+                            ),
+
+                            GestureDetector(
+
+                              onTap:woenabled? (){
+
+                                _isLoading = true;
+
+                                showdialogg("WO",context,shopdata,progress);
+
+                                // timer = Timer.periodic(Duration(seconds: 1), (Timer t) => {
+                                //
+                                //   if(!_isLoading){
+                                //
+                                //     Navigator.push(
+                                //         context,
+                                //         MaterialPageRoute(
+                                //             builder: (context) =>
+                                //                 HomeScreen())),
+                                //     timer?.cancel()
+                                //   }
+                                //
+                                // });
+
+                              }:null,
+                              child:Container(
+                                height: 100,
+                                width: 100,
+                                margin: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: wo ?  const Color(0xff0e0e0e):Colors.grey,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Center(
+                                    child: Text("WEEK OFF",style: TextStyle(
+                                        color: Colors.white
+                                    ),
+                                    )
+                                ),
+                              ),
+                            )
+
+                          ],
+
+                        ),
+
+                        GestureDetector(
+                          onTap:abenabled?(){
+                            _isLoading = true;
+
+                            showdialogg("A",context,shopdata,progress);
+
+                            // timer = Timer.periodic(Duration(seconds: 1), (Timer t) => {
+                            //
+                            //   if(!_isLoading){
+                            //
+                            //     Navigator.push(
+                            //         context,
+                            //         MaterialPageRoute(
+                            //             builder: (context) =>
+                            //                 HomeScreen())),
+                            //
+                            //     timer?.cancel()
+                            //
+                            //   }
+                            //
+                            // });
+
+                          }:null,
+                          child: Container(
+                            height: 100,
+                            width: 100,
+                            margin: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: ab ?  const Color(0xff0e0e0e) : Colors.grey,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Center(
+                                child: Text("ABSENT",style: TextStyle(
+                                    color: Colors.white
+                                ),
+                                )
+                            ),
                           ),
                         )
-                    )
+
+                     ]
+
+                  ),
                 )
             )
         ),
@@ -386,14 +464,14 @@ class AttendanceState extends State<Attendance>{
 
   Future<void> showdialogg(String status,BuildContext ctx, List<Shops> listdata,progress) async {
 
-
     return showDialog(
         barrierDismissible: false,
         context: context,
         builder:(BuildContext context) {
+          ctx = context;
           return AlertDialog(
-            title: const Text('Attendance'),
-            content: const Text('Are you really present?'),
+            title: Text('Attendance'),
+            content: status=="P"? Text('Are you really present?'):Text('Are you really Sure?'),
             actions: <Widget>[
 
               TextButton(
@@ -567,7 +645,6 @@ class AttendanceState extends State<Attendance>{
 
   }
 
-
   Future<void> markattendance(String status, String beatid,BuildContext context,File file,progress) async {
 
     try{
@@ -598,7 +675,15 @@ class AttendanceState extends State<Attendance>{
 
         if(responsedData.contains("DONE")){
 
-          progress.dismiss();
+          setState(() {
+            _isLoading = false;
+          });
+
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      HomeScreen()));
 
          // final currentContext = context;
 
@@ -619,16 +704,15 @@ class AttendanceState extends State<Attendance>{
     }catch(e){
 
       print("print image $e");
-      Fluttertoast.showToast(msg: "$e",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      // Fluttertoast.showToast(msg: "$e",
+      //     toastLength: Toast.LENGTH_SHORT,
+      //     gravity: ToastGravity.BOTTOM,
+      //     timeInSecForIosWeb: 1,
+      //     backgroundColor: Colors.black,
+      //     textColor: Colors.white,
+      //     fontSize: 16.0);
 
     }
-
 
   }
 

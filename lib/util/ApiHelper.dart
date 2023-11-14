@@ -227,7 +227,7 @@ Future<void> savepromotersale(String salesEntry,String file,String file1,String 
 
   try{
 
-    print("Sales entry ${salesEntry.toString()}");
+    print("Sales entry $file1 $file2");
     var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales2'));
     request.fields['salesEntry']= salesEntry.toString();
     request.files.add(await http.MultipartFile.fromPath('image', file));

@@ -311,17 +311,14 @@ class SalesEntryState extends State<SalesEntry>{
                                         onTap: (){
 
                                           final progress  = ProgressHUD.of(ctx);
-
-
                                           save(dropdownOptionsProvider,context,progress);
+
                                         },
 
-                                        child:Container(
-                                          child:  const Center(
-                                            child:Text("SAVE",style: TextStyle(
-                                                fontSize: 16
-                                            ),
-                                            ),
+                                        child:const Center(
+                                          child:Text("SAVE",style: TextStyle(
+                                              fontSize: 16
+                                          ),
                                           ),
                                         )
                                      )
@@ -511,13 +508,16 @@ class SalesEntryState extends State<SalesEntry>{
           Fluttertoast.showToast(msg: "Please select date");
 
         }else {
+
           progress?.show();
+
           for (int i = 0; i < dynamicList.length; i++) {
+
             items.add(SalesItem(
                 int.parse(dropdownOptionsProvider.SKUid[i].toString()),
                 int.parse(dropdownOptionsProvider.selectedpieces[i].toString()),
-                int.parse(
-                    dropdownOptionsProvider.selectedpieces[i].toString())));
+                dropdownOptionsProvider.selectedquantity[i]));
+
           }
 
           var salesentry = [{
@@ -540,9 +540,10 @@ class SalesEntryState extends State<SalesEntry>{
 
           var body = json.encode(salesentry);
 
-
           try{
-            print("body value $f1");
+
+            print("body value ${body.toString()}");
+
             if(f1==null && f2==null){
 
               print("first");
@@ -571,10 +572,12 @@ class SalesEntryState extends State<SalesEntry>{
         }
     }
 
-    void addwidget(skUlist,itemid,imageurl) async{
+    void addwidget(skUlist,itemid,imageurl,num quantity) async{
+
+      print("$quantity");
 
       setState(() {
-        dynamicList.add(MyWidget(skUlist,itemid,imageurl,idx));
+        dynamicList.add(MyWidget(skUlist,itemid,imageurl,idx,quantity));
       });
 
       idx++;
@@ -601,7 +604,8 @@ class SalesEntryState extends State<SalesEntry>{
                       onTap: (){
 
                         Navigator.pop(context);
-                        addwidget(SKUlist[i]['itemName'],SKUlist[i]['itemID'],SKUlist[i]['imageurl']);
+
+                        addwidget(SKUlist[i]['itemName'],SKUlist[i]['itemID'],SKUlist[i]['imageurl'],num.parse(SKUlist[i]['quantity']));
 
                       },
 

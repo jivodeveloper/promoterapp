@@ -1,6 +1,7 @@
 class SalesItem {
 
-  int itemid=0,pieces=0,quantity=0;
+  int itemid=0,pieces=0;
+  num quantity=0.0;
 
   SalesItem(this.itemid, this.pieces, this.quantity);
 

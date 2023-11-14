@@ -6,7 +6,6 @@ import 'package:promoterapp/util/ApiHelper.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:permission_handler/permission_handler.dart' as Permissionhandler;
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:latlong2/latlong.dart';
@@ -26,8 +25,10 @@ void getAttendanceStatus() async {
 
     penabled = true;
     woenabled = true;
+    abenabled = true;
     present = true;
-    wo =true;
+    wo = true;
+    ab = true;
 
     eod = false;
     hd = false;
@@ -38,11 +39,14 @@ void getAttendanceStatus() async {
 
     penabled = false;
     woenabled =false;
+    abenabled = false;
     present = false;
     wo = false;
+    ab = false;
 
     eod = true;
     hd = true;
+
     eodenabled =true;
     hdenabled =true;
 
@@ -52,6 +56,8 @@ void getAttendanceStatus() async {
     woenabled =false;
     eodenabled =false;
     hdenabled =false;
+    ab = false;
+    abenabled = false;
 
     present = false;
     eod = false;
@@ -63,8 +69,10 @@ void getAttendanceStatus() async {
     penabled = false;
     woenabled =false;
     hdenabled =false;
-    eodenabled =true;
+    ab = false;
+    abenabled = false;
 
+    eodenabled =true;
     present = false;
     eod = true;
     wo = false;
@@ -76,6 +84,22 @@ void getAttendanceStatus() async {
     woenabled =false;
     eodenabled =false;
     hdenabled =false;
+    ab = false;
+    abenabled = false;
+
+    present = false;
+    eod = false;
+    wo = false;
+    hd = false;
+
+  }else if(attStatus=="A") {
+
+    penabled = false;
+    woenabled =false;
+    eodenabled =false;
+    hdenabled =false;
+    ab = false;
+    abenabled = false;
 
     present = false;
     eod = false;

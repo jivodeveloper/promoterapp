@@ -32,5 +32,5 @@ const String appTitle = 'Drawer Demo';
 const String latitude = 'latitude';
 const String longitude = 'longitude';
 
-bool present = true, hd = true, wo = true,eod = true;
-bool penabled = true,hdenabled = true,woenabled = true,eodenabled = true;
+bool present = true, hd = true, wo = true,eod = true ,ab =true;
+bool penabled = true,hdenabled = true,woenabled = true,eodenabled = true,abenabled= true;

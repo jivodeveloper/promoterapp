@@ -7,8 +7,9 @@ class MyWidget extends StatelessWidget{
 
   String skulist="",image="";
   int skuid,idx=0;
+  num quantity=0.0;
 
-  MyWidget(this.skulist,this.skuid,this.image,this.idx);
+  MyWidget(this.skulist,this.skuid,this.image,this.idx,this.quantity);
 
   TextEditingController pieces = TextEditingController();
 
@@ -61,7 +62,7 @@ class MyWidget extends StatelessWidget{
                                   child: TextField(
                                     controller: pieces,
                                     onChanged: (value){
-                                      dropdownOptionsProvider.additemdropdown(idx, int.parse(value), skuid);
+                                      dropdownOptionsProvider.additemdropdown(idx, int.parse(value), skuid,quantity);
                                     },
                                     keyboardType: TextInputType.number,
                                     decoration: InputDecoration(
@@ -70,7 +71,7 @@ class MyWidget extends StatelessWidget{
                                     style: TextStyle(fontSize: 16.0, height: 2.0, color: Colors.black),
                                   ),
                                 )
-                            ),
+                             ),
 
                             // Expanded(
                             //     flex: 1,
@@ -82,7 +83,7 @@ class MyWidget extends StatelessWidget{
                             //     )
                             // ),
 
-                          ]
+                         ]
 
                       ),
                     )
@@ -91,7 +92,7 @@ class MyWidget extends StatelessWidget{
                 ),
               )
 
-            ]
+           ]
         )
     );
 

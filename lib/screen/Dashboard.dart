@@ -52,6 +52,7 @@ class Dashboardstate extends State<Dashboard>{
     getSKU('GetShopsItemData').then((value) => {
 
       savelocaldb(value)
+
     });
 
   }
