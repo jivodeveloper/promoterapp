@@ -11,7 +11,10 @@ class MyWidget extends StatelessWidget{
 
   MyWidget(this.skulist,this.skuid,this.image,this.idx,this.quantity);
 
-  TextEditingController pieces = TextEditingController();
+  TextEditingController op_stock = TextEditingController();
+  TextEditingController clo_stock = TextEditingController();
+  TextEditingController samp_stock = TextEditingController();
+  TextEditingController sale = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +28,7 @@ class MyWidget extends StatelessWidget{
             children: [
 
               Card(
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(20.0),topRight: Radius.circular(20.0)),),
+                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topLeft: Radius.circular(20.0),topRight: Radius.circular(20.0)),),
                 elevation: 10,
                 shadowColor: Colors.black,
                 child:Column(
@@ -45,33 +47,102 @@ class MyWidget extends StatelessWidget{
                     ),
 
                     Container(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.only(left: 10,top: 10,bottom: 10),
                       child:Row(
 
                           children: [
 
                             Expanded(
-                              flex:3,
+                              flex:1,
                               child: Image.network(image,width: 50,height: 100),
                             ),
 
                             Expanded(
                                 flex: 1,
-                                child:SizedBox(
-                                  width: 100,
-                                  child: TextField(
-                                    controller: pieces,
-                                    onChanged: (value){
-                                      dropdownOptionsProvider.additemdropdown(idx, int.parse(value), skuid,quantity);
-                                    },
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                        hintText: "Pieces"
+                                child:Column(
+                                  children: [
+
+                                    SizedBox(
+                                      width: 110,
+                                      child: TextField(
+                                        controller: op_stock,
+                                        onChanged: (value){
+                                          // if(page==""){
+                                          dropdownOptionsProvider.addopeningstock(idx, int.parse(value), skuid);
+                                          // }else{
+                                          //   dropdownOptionsProvider.additemdropdown(idx, int.parse(value), skuid,quantity);
+                                          // }
+
+                                        },
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                            hintText: "Opening Stock"
+                                        ),
+                                        style: TextStyle(fontSize: 16.0, height: 2.0, color: Colors.black),
+                                      ),
                                     ),
-                                    style: TextStyle(fontSize: 16.0, height: 2.0, color: Colors.black),
-                                  ),
+
+                                    SizedBox(
+                                      width: 110,
+                                      child: TextField(
+                                        controller: clo_stock,
+                                        onChanged: (value){
+
+                                          // if(page==""){
+                                          dropdownOptionsProvider.addclosingstock(idx, int.parse(value), skuid);
+                                          // }else{
+                                          //   dropdownOptionsProvider.additemdropdown(idx, int.parse(value), skuid,quantity);
+                                          // }
+
+                                        },
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                            hintText: "Closing Stock"
+                                        ),
+                                        style: TextStyle(fontSize: 16.0, height: 2.0, color: Colors.black),
+                                      ),
+                                    ),
+
+                                    SizedBox(
+                                      width: 110,
+                                      child: TextField(
+                                        controller: samp_stock,
+                                        onChanged: (value){
+
+                                          dropdownOptionsProvider.addsamplestock(idx, int.parse(value), skuid);
+
+                                        },
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                            hintText: "Sample Stock"
+                                        ),
+                                        style: TextStyle(fontSize: 16.0, height: 2.0, color: Colors.black),
+                                      ),
+                                    ),
+
+                                    SizedBox(
+                                      width: 110,
+                                      child: TextField(
+                                        controller: sale,
+                                        onChanged: (value){
+                                          // if(page==""){
+                                          dropdownOptionsProvider.addsale(idx, int.parse(value), skuid,quantity);
+                                          // }else{
+                                          //   dropdownOptionsProvider.additemdropdown(idx, int.parse(value), skuid,quantity);
+                                          // }
+
+                                        },
+                                        keyboardType: TextInputType.number,
+                                        decoration: InputDecoration(
+                                            hintText: "Sale"
+                                        ),
+                                        style: TextStyle(fontSize: 16.0, height: 2.0, color: Colors.black),
+                                      ),
+                                    )
+
+                                  ],
                                 )
-                             ),
+                            ),
 
                             // Expanded(
                             //     flex: 1,
@@ -83,7 +154,7 @@ class MyWidget extends StatelessWidget{
                             //     )
                             // ),
 
-                         ]
+                          ]
 
                       ),
                     )
@@ -92,7 +163,7 @@ class MyWidget extends StatelessWidget{
                 ),
               )
 
-           ]
+            ]
         )
     );
 

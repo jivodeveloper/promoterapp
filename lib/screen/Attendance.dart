@@ -18,10 +18,10 @@ import 'package:http/http.dart' as http;
 
 class Attendance extends StatefulWidget{
 
-  @override
-  State<StatefulWidget> createState() {
-    return AttendanceState();
-  }
+    @override
+    State<StatefulWidget> createState() {
+      return AttendanceState();
+    }
 
 }
 
@@ -38,6 +38,7 @@ class AttendanceState extends State<Attendance>{
   bool cstatus = false ,lstatus =false,gpsstatus=false;
   Location location = new Location();
   Timer? timer;
+  File? f;
 
   @override
   void initState() {
@@ -74,12 +75,12 @@ class AttendanceState extends State<Attendance>{
 
       if(camerastatus.isGranted==true){
         cstatus = true;
-        print("cstatus$cstatus");
+
       }
 
       if(locationstatus.isGranted == true){
         lstatus = true;
-        print("lstatus$lstatus");
+
       }
 
       bool ison = await location.serviceEnabled();
@@ -89,14 +90,10 @@ class AttendanceState extends State<Attendance>{
         bool isturnedon = await location.requestService();
 
         if (isturnedon) {
-
           gpsstatus = true;
           print("gpsstatus$gpsstatus");
-
         }else{
-
           print("gpsstatus$isturnedon");
-
         }
 
       }else{
@@ -106,7 +103,9 @@ class AttendanceState extends State<Attendance>{
       }
 
     }catch(e){
+
       print("gpsstatus$e");
+
     }
 
   }
@@ -137,36 +136,15 @@ class AttendanceState extends State<Attendance>{
 
       shopdata = value;
 
-      // for(int i=0 ;i<value.length;i++){
-      //
-      //   if(value[i].retailerName != ""){
-      //
-      //     print("length${value.length}");
-      //
-      //     setState(() {
-      //
-      //       beatnamelist.add(value[i].retailerName.toString());
-      //       beatIdlist.add(value[i].retailerID!.toInt());
-      //
-      //     });
-      //
-      //   }
-      //
-      // }
-      //
-      // beatnamelist = LinkedHashSet<String>.from(beatnamelist).toList();
-      //
-      // beatIdlist = LinkedHashSet<int>.from(beatIdlist).toList();
-
     }
 
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext ctx) {
 
     return WillPopScope(
-       child: Scaffold(
+        child: Scaffold(
             appBar: AppBar(
                 backgroundColor: Colors.white,
                 leading: GestureDetector(
@@ -215,25 +193,11 @@ class AttendanceState extends State<Attendance>{
 
                                 }else{
 
-                                  // final progress  = ProgressHUD.of(ctx);
-                                  // progress?.show();
-                                  _isLoading = true ;
-                                  showdialogg("P",context,shopdata,progress);
+                                  setState(() {
+                                    _isLoading=true;
+                                  });
 
-                                  // timer = Timer.periodic(Duration(seconds: 2), (Timer t) => {
-                                  //
-                                  //   if(!_isLoading){
-                                  //
-                                  //     Navigator.push(
-                                  //     context,
-                                  //     MaterialPageRoute(
-                                  //         builder: (contextt) =>
-                                  //             HomeScreen())),
-                                  //     timer?.cancel()
-                                  //
-                                  //   }
-                                  //
-                                  // });
+                                  showdialogg("P",ctx,shopdata);
 
                                 }
 
@@ -259,20 +223,21 @@ class AttendanceState extends State<Attendance>{
 
                               onTap: eodenabled?(){
 
-                                // final progress  = ProgressHUD.of(context);
+                                setState(() {
+                                  _isLoading=true;
+                                });
+
+                                // final progress  = ProgressHUD.of(ctx);
                                 // progress?.show();
-                                _isLoading = true;
-                                showdialogg("EOD",context, shopdata,progress);
+                                showdialogg("EOD",ctx, shopdata);
+
                                 // timer = Timer.periodic(Duration(seconds: 2), (Timer t) => {
                                 //
-                                //   if(!_isLoading){
+                                //   if(_isLoading==false){
                                 //
-                                //     Navigator.push(
-                                //         context,
-                                //         MaterialPageRoute(
-                                //             builder: (contextt) =>
-                                //                 HomeScreen())),
-                                //     timer?.cancel()
+                                //     timer?.cancel(),
+                                //
+                                //
                                 //   }
                                 //
                                 // });
@@ -313,25 +278,12 @@ class AttendanceState extends State<Attendance>{
                                   Fluttertoast.showToast(msg: "Please allow location permission");
 
                                 }else{
+                                  setState(() {
+                                    _isLoading=true;
+                                  });
 
-                                  _isLoading = true;
-                                  // final progress  = ProgressHUD.of(context);
-                                  // progress?.show();
-                                  showdialogg("NOON",context,shopdata,progress);
+                                  showdialogg("NOON",ctx,shopdata);
 
-                                  // timer = Timer.periodic(Duration(seconds: 1), (Timer t) => {
-                                  //
-                                  //   if(!_isLoading){
-                                  //
-                                  //     Navigator.push(
-                                  //         context,
-                                  //         MaterialPageRoute(
-                                  //             builder: (context) =>
-                                  //                 HomeScreen())),
-                                  //     timer?.cancel()
-                                  //   }
-                                  //
-                                  // });
                                 }
 
                               }:null,
@@ -354,27 +306,22 @@ class AttendanceState extends State<Attendance>{
                             ),
 
                             GestureDetector(
-
                               onTap:woenabled? (){
 
-                                _isLoading = true;
+                                setState(() {
+                                  _isLoading=true;
+                                });
+                                showdialogg("WO",context,shopdata);
 
-                                showdialogg("WO",context,shopdata,progress);
-
-                                // timer = Timer.periodic(Duration(seconds: 1), (Timer t) => {
-                                //
-                                //   if(!_isLoading){
-                                //
-                                //     Navigator.push(
-                                //         context,
-                                //         MaterialPageRoute(
-                                //             builder: (context) =>
-                                //                 HomeScreen())),
-                                //     timer?.cancel()
-                                //   }
-                                //
-                                // });
-
+                                // try{
+                                //   Navigator.push(
+                                //       context,
+                                //       MaterialPageRoute(
+                                //           builder: (ctx) =>
+                                //               HomeScreen()));
+                                // }catch(e){
+                                //   print("print image $e");
+                                // }
                               }:null,
                               child:Container(
                                 height: 100,
@@ -397,44 +344,39 @@ class AttendanceState extends State<Attendance>{
 
                         ),
 
-                        GestureDetector(
-                          onTap:abenabled?(){
-                            _isLoading = true;
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
 
-                            showdialogg("A",context,shopdata,progress);
+                            GestureDetector(
+                              onTap:abenabled?(){
 
-                            // timer = Timer.periodic(Duration(seconds: 1), (Timer t) => {
-                            //
-                            //   if(!_isLoading){
-                            //
-                            //     Navigator.push(
-                            //         context,
-                            //         MaterialPageRoute(
-                            //             builder: (context) =>
-                            //                 HomeScreen())),
-                            //
-                            //     timer?.cancel()
-                            //
-                            //   }
-                            //
-                            // });
+                                setState(() {
+                                  _isLoading=true;
+                                });
 
-                          }:null,
-                          child: Container(
-                            height: 100,
-                            width: 100,
-                            margin: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: ab ?  const Color(0xff0e0e0e) : Colors.grey,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(
-                                child: Text("ABSENT",style: TextStyle(
-                                    color: Colors.white
+                                showdialogg("A",ctx,shopdata);
+
+                              }:null,
+                              child: Container(
+                                height: 100,
+                                width: 100,
+                                margin: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: ab ?  const Color(0xff0e0e0e) : Colors.grey,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                )
-                            ),
-                          ),
+                                child: const Center(
+                                    child: Text("ABSENT",style: TextStyle(
+                                        color: Colors.white
+                                    ),
+                                    )
+                                ),
+                              ),
+                            )
+
+                          ],
                         )
 
                      ]
@@ -462,7 +404,7 @@ class AttendanceState extends State<Attendance>{
 
   }
 
-  Future<void> showdialogg(String status,BuildContext ctx, List<Shops> listdata,progress) async {
+  Future<void> showdialogg(String status,BuildContext ctx, List<Shops> listdata) async {
 
     return showDialog(
         barrierDismissible: false,
@@ -470,14 +412,17 @@ class AttendanceState extends State<Attendance>{
         builder:(BuildContext context) {
           ctx = context;
           return AlertDialog(
-            title: Text('Attendance'),
-            content: status=="P"? Text('Are you really present?'):Text('Are you really Sure?'),
+            title: const Text('Attendance'),
+            content:status=="P"||status=="NOON"?Text('Are you really present?'):Text('Are you sure?'),
             actions: <Widget>[
 
               TextButton(
                 onPressed: () => {
                   Navigator.pop(context, 'Cancel'),
-                  progress!.dismiss()
+                  setState(() {
+                    _isLoading = false;
+                  })
+                 // progress!.dismiss()
                 },
                 child: const Text('No'),
               ),
@@ -485,7 +430,18 @@ class AttendanceState extends State<Attendance>{
               TextButton(
                 onPressed: () =>{
                   // Navigator.pop(context),
-                  gettodaysbeatt(status,ctx,listdata,progress),
+                  print("$status "),
+                  if(status=="P" || status=="NOON" ||status=="EOD"){
+
+                   // print("inside "),
+                    gettodaysbeatt(status,ctx,listdata),
+
+                  }else{
+
+                     markattendance(status,beatId.toString(),context,f)
+
+                  }
+
                 },
 
                 child: const Text('Yes'),
@@ -501,24 +457,24 @@ class AttendanceState extends State<Attendance>{
 
   }
 
-  Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist,progress) async {
+  Future<void> gettodaysbeatt(status,context,List<Shops> beatnamelist) async {
 
     int beatId = (SharedPrefClass.getInt(BEAT_ID)==0 ? -1 : SharedPrefClass.getInt(BEAT_ID));
 
-    if(beatId==0 || beatId ==-1){
+    if(beatId==0 || beatId ==-1 ){
 
       //showbeat(status,context,beatnamelist,beatIdlist);
-      showbeatt(status,context,beatnamelist,progress);
+      showbeatt(status,context,beatnamelist);
 
     }else{
 
-      markattendance(status,beatId.toString(),context,"" as File,progress);
+      markattendance(status,beatId.toString(),context,"" as File);
 
     }
 
   }
 
-  Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist,progress) async {
+  Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist) async {
 
     if(beatnamelist.isEmpty){
 
@@ -568,9 +524,13 @@ class AttendanceState extends State<Attendance>{
                           if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
 
                             SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
-                            selectFromCamera(status,beatnamelist[i].toString(),contextt,progress);
+                            selectFromCamera(status,beatnamelist[i].toString(),contextt);
 
                           }else{
+
+                            setState(() {
+                              _isLoading=false;
+                            });
 
                             Fluttertoast.showToast(msg: "Too far from store!",
                                 toastLength: Toast.LENGTH_SHORT,
@@ -600,7 +560,7 @@ class AttendanceState extends State<Attendance>{
 
   }
 
-  selectFromCamera(String status, String beatid,BuildContext contextt,progress) async {
+  selectFromCamera(String status, String beatid,BuildContext contextt) async {
 
     var camerastatus = await Permissionhandler.Permission.camera.status;
 
@@ -622,7 +582,7 @@ class AttendanceState extends State<Attendance>{
 
       try{
 
-        File? f;
+
         int userid=0;
         userid = SharedPrefClass.getInt(USER_ID);
 
@@ -633,7 +593,7 @@ class AttendanceState extends State<Attendance>{
         String newPath = path.join(dir,("$userid-${now.day}-${now.month}-${now.year}-${now.hour}${now.minute}${now.second}.jpg"));
         f = await File(cameraFile.path).copy(newPath);
 
-        markattendance(status,beatid,contextt,f,progress);
+        markattendance(status,beatid,contextt,f!);
 
       }catch(e){
 
@@ -645,7 +605,7 @@ class AttendanceState extends State<Attendance>{
 
   }
 
-  Future<void> markattendance(String status, String beatid,BuildContext context,File file,progress) async {
+  Future<void> markattendance(String status, String beatid,BuildContext ctx,File? file) async {
 
     try{
 
@@ -657,7 +617,10 @@ class AttendanceState extends State<Attendance>{
       request.fields['status']= status;
       request.fields['latitude']= SharedPrefClass.getDouble(latitude).toString();
       request.fields['longitude']= SharedPrefClass.getDouble(longitude).toString();
-      request.files.add(await http.MultipartFile.fromPath('image', file.path));
+
+      if(file != null){
+        request.files.add(await http.MultipartFile.fromPath('image', file.path));
+      }
 
       var response = await request.send();
       var responsed = await http.Response.fromStream(response);
@@ -676,7 +639,7 @@ class AttendanceState extends State<Attendance>{
         if(responsedData.contains("DONE")){
 
           setState(() {
-            _isLoading = false;
+            _isLoading=false;
           });
 
           Navigator.push(
@@ -685,7 +648,8 @@ class AttendanceState extends State<Attendance>{
                   builder: (context) =>
                       HomeScreen()));
 
-         // final currentContext = context;
+          //  progress.dismiss();
+          // final currentContext = context;
 
         }
 
@@ -704,6 +668,7 @@ class AttendanceState extends State<Attendance>{
     }catch(e){
 
       print("print image $e");
+
       // Fluttertoast.showToast(msg: "$e",
       //     toastLength: Toast.LENGTH_SHORT,
       //     gravity: ToastGravity.BOTTOM,
@@ -713,6 +678,7 @@ class AttendanceState extends State<Attendance>{
       //     fontSize: 16.0);
 
     }
+
 
   }
 

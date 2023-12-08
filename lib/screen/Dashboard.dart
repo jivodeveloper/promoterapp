@@ -11,6 +11,7 @@ import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:promoterapp/models/Item.dart';
 import 'package:promoterapp/screen/SalesEntry.dart';
+import 'package:slide_drawer/slide_drawer.dart';
 
 class Dashboard extends StatefulWidget{
 
@@ -29,7 +30,7 @@ class Dashboardstate extends State<Dashboard>{
   String device="";
   String name="";
   List<Item> itemdata = [];
- // Logindetails? logindetails ;
+ //Logindetails? logindetails ;
   bool _isLoading = false;
   Future<Logindetails>? userdetails;
 
@@ -38,7 +39,7 @@ class Dashboardstate extends State<Dashboard>{
     super.initState();
 
     _isLoading = true;
-    //getdevicedetails();
+  //getdevicedetails();
     name = SharedPrefClass.getString(PERSON_NAME);
     userdetails = getuserdetails('Userdetails');
     Future.delayed(const Duration(milliseconds: 600), () {
@@ -81,35 +82,18 @@ class Dashboardstate extends State<Dashboard>{
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
-          title:Row(
-            children: [
-
-              Expanded(
-                flex:1,
-                child:Image.asset('assets/Images/jivo_logo.png',width: 40,height: 40,),
-              ),
-
-              Expanded(
-                flex:12,
-                child: const Text("  Dashboard", style: TextStyle(color:Color(0xFF063A06),fontWeight: FontWeight.w400,fontSize: 21)),
-              )
-
-            ],
-          ),
-         actions: [
-
-            IconButton(
-              icon: Image.asset(
-               'assets/Images/logout.png', height:40, width:25),
-              onPressed: () {
-                logout(context);
-              },
-            )
-
-          ],
-       ),
+          title: Text("My Dashboard",
+              style: TextStyle(color: Color(0xFF095909),
+                  fontWeight: FontWeight.w400)),
+          leading: GestureDetector(
+            onTap: () {
+              SlideDrawer.of(context)?.toggle();
+            },
+            child: Image.asset(
+              'assets/Icons/nav_menu.png', width: 104.0, height: 104.0),
+          )
+      ),
       body: _isLoading?const Center(
           child:CircularProgressIndicator()
       ):Column(
@@ -150,16 +134,16 @@ class Dashboardstate extends State<Dashboard>{
           ),
 
           Container(
-            margin: EdgeInsets.only(left: 15,right: 15,top: 20),
 
+            margin: EdgeInsets.only(left: 15,right: 15,top: 20),
             child: Center(
               child: Text("Welcome $name",style: TextStyle(color: Colors.black,fontSize: 18),),
             ),
+
           ),
 
           Container(
             margin: EdgeInsets.only(left: 15,right: 15,top: 20),
-
             decoration: const BoxDecoration(
                 color: green,
                 borderRadius: BorderRadius.all(
@@ -256,7 +240,7 @@ class Dashboardstate extends State<Dashboard>{
      );
    }
 
-  void logout(BuildContext ctx) {
+   void logout(BuildContext ctx) {
 
     showDialog(
       context: ctx,
@@ -264,12 +248,14 @@ class Dashboardstate extends State<Dashboard>{
           AlertDialog(
             content: const Text('Logout'),
             actions: <TextButton>[
+
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
                 child: const Text('No'),
               ),
+
               TextButton(
                 onPressed: () async {
 
@@ -285,9 +271,9 @@ class Dashboardstate extends State<Dashboard>{
                 },
                 child: const Text('Yes'),
                )
+
              ],
-          ),
-       );
+          ));
 
   }
 

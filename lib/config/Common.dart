@@ -1,9 +1,8 @@
 
 // const String IP_URL="http://172.99.188.96/AndroidServer/";
 
-// const String IP_URL="http://dsr.jivocanola.com/AndroidServer/";
-const String IP_URL="http://192.168.1.249:9090/AndroidServer/";
-// const String IP_URL="http://122.180.240.216:9090/AndroidServer/";
+const String IP_URL="http://dsr.jivocanola.com/AndroidServer/";
+// const String IP_URL="http://192.168.1.249:9090/AndroidServer/";
 
 const String USER_ID = "userId";
 const String PERSON_TYPE = "personType";

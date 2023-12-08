@@ -1,13 +1,13 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:promoterapp/config/Color.dart';
-import 'package:promoterapp/config/Common.dart';
+import 'package:promoterapp/screen/StockEntry.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:promoterapp/screen/SalesReport.dart';
 import 'package:promoterapp/screen/Attendance.dart';
 import 'package:promoterapp/screen/Dashboard.dart';
+import 'package:slide_drawer/slide_drawer.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'LoginScreen.dart';
 import 'dart:async';
-import 'package:promoterapp/screen/SalesEntry.dart';
-import 'package:promoterapp/screen/SalesReport.dart';
-import 'package:promoterapp/util/Shared_pref.dart';
 
 class HomeScreen extends StatefulWidget{
 
@@ -39,12 +39,6 @@ class HomeScreenState extends State<HomeScreen>{
     super.initState();
   }
 
-  // @override
-  // void dispose() {
-  //   timer.cancel();
-  //   super.dispose();
-  // }
-
   void logout(BuildContext ctx) {
 
     showDialog(
@@ -53,18 +47,32 @@ class HomeScreenState extends State<HomeScreen>{
           AlertDialog(
             content: const Text('Logout'),
             actions: <TextButton>[
+
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);
                 },
                 child: const Text('No'),
               ),
+
               TextButton(
                 onPressed: () async {
+
+                  SharedPreferences preferences = await SharedPreferences
+                      .getInstance();
+                  preferences.clear();
+
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              LoginScreen()));
+
 
                 },
                 child: const Text('Yes'),
               )
+
             ],
           ),
       );
@@ -75,38 +83,145 @@ class HomeScreenState extends State<HomeScreen>{
   Widget build(BuildContext context) {
     return WillPopScope(
 
-        child: Scaffold(
-          body: [
+      child: MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: appTitle,
+      home: SlideDrawer(
+        drawer: Container(
+          color: Color(0xFF063A06),
+          padding: EdgeInsets.only(left: 0, top: 100, right: 10),
+          child: Column(
+            children: [
 
-            Dashboard(),
-            Attendance(),
-            SalesReport()
+              Row(
+                children: [
 
-          ]
-          [currentIndex],
-          bottomNavigationBar: BottomNavigationBar(
-            selectedItemColor: app_theme,
-            unselectedItemColor: Colors.grey,
-            onTap: (index) {
-              setState(() {
-                currentIndex = index;
-              });
-            },
-            currentIndex: currentIndex,
-            items: const [
+                  Expanded(
+                      flex: 1,
+                      child: Image.asset(
+                          'assets/Images/logo.png', height: 40)),
 
-              BottomNavigationBarItem(icon: Icon(Icons.home,color: app_theme), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.person,color: app_theme), label: "Attendance"),
-              BottomNavigationBarItem(icon: Icon(Icons.report,color: app_theme), label:"Reports"),
+                  Expanded(
+                    flex: 3,
+                    child: Text("Welcome", style: TextStyle(fontSize: 20,
+                        color: Colors.white,
+                        fontFamily: 'OpenSans',
+                        fontWeight: FontWeight.w900)),)
+
+                ],
+              ),
+
+              Padding(
+                  padding: EdgeInsets.only(top: 60),
+                  child: ListTile(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (contextt) =>
+                                  HomeScreen()
+                          ));
+                    },
+                    leading: Image.asset(
+                        'assets/Images/home.png', height: 25),
+                    title: Text(
+                      'Home',
+                      style: TextStyle(color: Colors.white,
+                          fontSize: 14,
+                          fontFamily: 'OpenSans',
+                          fontWeight: FontWeight.w600),
+                    ),
+                  )
+              ),
+
+              ListTile(
+                leading: Image.asset(
+                    'assets/Images/attendance.png', height: 25),
+                onTap: () {
+
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (contextt) =>
+                              Attendance()));
+
+                },
+                title: Text(
+                  'Attendance',
+                  style: TextStyle(color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'OpenSans',
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+
+              ListTile(
+                leading: Image.asset(
+                    'assets/Images/shop.png', height: 25),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (contextt) =>
+                              SalesReport()));
+
+
+                },
+                title: Text(
+                  'Sales Report',
+                  style: TextStyle(color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'OpenSans',
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
+
+              //
+              // ListTile(
+              //   leading: Image.asset(
+              //       'assets/Images/shop.png', height: 25),
+              //   onTap: () {
+              //     Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //             builder: (contextt) =>
+              //                 StockEntry()));
+              //
+              //   },
+              //   title: Text(
+              //     'Stock Report',
+              //     style: TextStyle(color: Colors.white,
+              //         fontSize: 14,
+              //         fontFamily: 'OpenSans',
+              //         fontWeight: FontWeight.w600),
+              //   ),
+              // ),
+
+              ListTile(
+                leading: Image.asset(
+                    'assets/Images/shutdown.png', height: 25),
+                onTap: () {
+                  logout(context);
+                },
+                title: Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.white,
+                      fontSize: 14,
+                      fontFamily: 'OpenSans',
+                      fontWeight: FontWeight.w600),
+                ),
+              ),
 
             ],
           ),
-
         ),
+        child: Dashboard(),
+       ),
+      ),
         onWillPop: () async {
           logout(context);
           return new Future(() => true);
-        }
+      }
 
     );
   }
@@ -128,8 +243,7 @@ class HomeScreenState extends State<HomeScreen>{
               )
             ],
           ),
-
-    );
+     );
 
   }
 

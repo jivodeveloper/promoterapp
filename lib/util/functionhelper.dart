@@ -128,7 +128,6 @@ Future<bool> checkNetwork() async {
   return isConnected;
 }
 
-
 // Future<void> showdialogg(String status,BuildContext context, List<Shops> listdata,progress) async {
 //
 //   progress.dismiss();
@@ -315,7 +314,6 @@ Future<bool> checkNetwork() async {
 //
 // }
 
-
 Future<void> askpermission() async {
 
   var camerastatus = await Permissionhandler.Permission.camera.status;
@@ -342,7 +340,6 @@ Future<void> askpermission() async {
   }
 
 }
-
 
 Future<void> checkdistance() async {
 
@@ -400,7 +397,7 @@ Future<String> getdate(context) async{
 }
 
 /*sales entry*/
-Future<void> showskudialog(context, List SKUlist,List SKUid) async {
+Future<void> showskudialog(context, List SKUlist) async {
 
   return showDialog<void>(
     context: context,
@@ -418,12 +415,12 @@ Future<void> showskudialog(context, List SKUlist,List SKUid) async {
                   onTap: (){
 
                     Navigator.pop(context);
-
+                   // addwidget(SKUlist[i]['itemName'],SKUlist[i]['itemID'],SKUlist[i]['imageurl'],num.parse(SKUlist[i]['quantity']));
                   },
 
                   child: Container(
                     padding:const EdgeInsets.all(10),
-                    child: Text("${SKUlist[i]}"),
+                    child: Text("${SKUlist[i]['itemName']}"),
                   )
 
               );

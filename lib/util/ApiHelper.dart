@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:promoterapp/config/Color.dart';
@@ -8,7 +7,6 @@ import 'package:promoterapp/models/Shops.dart';
 import 'package:promoterapp/models/Logindetails.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
 import 'package:http/http.dart' as http;
-import 'package:promoterapp/screen/Attendance.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:promoterapp/models/saalesreport.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
@@ -143,7 +141,6 @@ Future<dynamic> getallbeat(String endpoint) async{
 
 }
 
-
 Future<List<saalesreport>> getreports(String endpoint,String from,String to) async {
 
   int userid=0;
@@ -227,14 +224,16 @@ Future<void> savepromotersale(String salesEntry,String file,String file1,String 
 
   try{
 
-    print("Sales entry $file1 $file2");
     var request = await http.MultipartRequest('POST', Uri.parse('${IP_URL}SavePromoterSales2'));
     request.fields['salesEntry']= salesEntry.toString();
     request.files.add(await http.MultipartFile.fromPath('image', file));
 
     if(file1!=""){
+
       request.files.add(await http.MultipartFile.fromPath('image1', file1));
-    }else if(file2!=""){
+    }
+    if(file2!=""){
+
       request.files.add(await http.MultipartFile.fromPath('image2', file2));
     }
 
@@ -242,6 +241,7 @@ Future<void> savepromotersale(String salesEntry,String file,String file1,String 
     var responsed = await http.Response.fromStream(response);
     final responsedData = json.decode(responsed.body);
 
+    print("${responsedData.toString()}");
     if(responsedData.contains("DONE")){
 
       progress.dismiss();

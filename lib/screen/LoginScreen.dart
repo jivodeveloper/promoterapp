@@ -7,7 +7,6 @@ import 'package:promoterapp/util/functionhelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 bool cstatus = false,lstatus =false;
 class LoginScreen extends StatefulWidget {
@@ -210,7 +209,7 @@ class LoginScreenState extends State<LoginScreen> {
          ),
         onWillPop: () async{
           return false;
-        }
+      }
     );
   }
 

@@ -87,7 +87,13 @@ flutter:
     - assets/Images/close.png
     - assets/Images/picture.png
     - assets/Images/plus.png
-
+    - assets/Images/logo.png
+    - assets/Images/home.png
+    - assets/Images/report.png
+    - assets/Images/shop.png
+    - assets/Icons/nav_menu.png
+    - assets/Images/attendance.png
+    - assets/Images/shutdown.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
