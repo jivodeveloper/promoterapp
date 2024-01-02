@@ -128,6 +128,13 @@ Future<bool> checkNetwork() async {
   return isConnected;
 }
 
+String getcurrentdatewithtime(){
+
+  String date =DateFormat('MM-dd-yyyy HH:mm:ss').format(DateTime.now());
+  return date;
+
+}
+
 // Future<void> showdialogg(String status,BuildContext context, List<Shops> listdata,progress) async {
 //
 //   progress.dismiss();
@@ -317,26 +324,19 @@ Future<bool> checkNetwork() async {
 Future<void> askpermission() async {
 
   var camerastatus = await Permissionhandler.Permission.camera.status;
-  var locationstatus = await Permissionhandler.Permission.location.status;
+  var locationstatus = await Permissionhandler.Permission.locationAlways.status;
 
-  if (camerastatus.isGranted == false && locationstatus.isGranted == false) {
+  if (camerastatus.isGranted == true && locationstatus.isGranted == false) {
+
+    Geolocator.openAppSettings();
+
+  } else if (camerastatus.isGranted == false && locationstatus.isGranted == false) {
 
     Map<Permissionhandler.Permission, Permissionhandler.PermissionStatus> statuses = await [
       Permissionhandler.Permission.location,
       Permissionhandler.Permission.camera
     ].request();
 
-  }else{
-
-    if(camerastatus.isGranted==true){
-      cstatus = true;
-      print("cstatus$cstatus");
-    }
-
-    if(locationstatus.isGranted == true){
-      lstatus = true;
-      print("lstatus$lstatus");
-    }
   }
 
 }
@@ -364,14 +364,23 @@ bool getdistance(lat1 ,lng1, lat2, lng2){
 
   bool isallowed = false;
   var distance = Distance();
-  final totaldist = distance(LatLng(lat1,lng2), LatLng(lat2,lng2));
 
+ // final totaldist = distance(LatLng(lat1,lng2), LatLng(lat2,lng2));
+  final totaldist = Geolocator.distanceBetween(lat1,lng1,lat2,lng2);
+  print("total distance $totaldist");
   int disallow = SharedPrefClass.getInt(DISTANCE_ALLOWED);
+  print("DISTANCE ALLOWED $disallow");
 
   if(disallow > totaldist){
+
+    print("$disallow");
     isallowed = true;
+
   }else{
+
+    print("$totaldist");
     isallowed = false;
+
   }
 
   return isallowed;

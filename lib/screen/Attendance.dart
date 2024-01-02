@@ -47,6 +47,9 @@ class AttendanceState extends State<Attendance>{
     askpermission();
     getCurrentPosition(context);
     getAttendanceStatus();
+    setState(() {
+      _isLoading = true;
+    });
     getallbeat('GetShopsData').then((value) => allbeatlist(value));
 
   }
@@ -135,7 +138,9 @@ class AttendanceState extends State<Attendance>{
     }else{
 
       shopdata = value;
-
+      setState(() {
+        _isLoading = false;
+      });
     }
 
   }
@@ -144,6 +149,7 @@ class AttendanceState extends State<Attendance>{
   Widget build(BuildContext ctx) {
 
     return WillPopScope(
+
         child: Scaffold(
             appBar: AppBar(
                 backgroundColor: Colors.white,
@@ -407,6 +413,7 @@ class AttendanceState extends State<Attendance>{
   Future<void> showdialogg(String status,BuildContext ctx, List<Shops> listdata) async {
 
     return showDialog(
+
         barrierDismissible: false,
         context: context,
         builder:(BuildContext context) {
@@ -429,11 +436,9 @@ class AttendanceState extends State<Attendance>{
 
               TextButton(
                 onPressed: () =>{
-                  // Navigator.pop(context),
-                  print("$status "),
+
                   if(status=="P" || status=="NOON" ||status=="EOD"){
 
-                   // print("inside "),
                     gettodaysbeatt(status,ctx,listdata),
 
                   }else{
@@ -480,7 +485,7 @@ class AttendanceState extends State<Attendance>{
 
       Navigator.pop(contextt);
 
-      Fluttertoast.showToast(msg: "You don't have any beat! \n Please contact admin",
+      Fluttertoast.showToast(msg: "No shop assigned",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
           timeInSecForIosWeb: 1,
@@ -491,68 +496,85 @@ class AttendanceState extends State<Attendance>{
     }else{
 
       Navigator.pop(contextt);
-      //  progress.dismiss();
 
       return showDialog<void>(
         context: contextt,
         barrierDismissible: false,
         builder: (BuildContext context) {
           contextt = context;
-          return AlertDialog(
-            title: const Text('Select Shop'),
-            content:ListView.builder(
-                shrinkWrap: true,
-                itemCount: beatnamelist.length,
-                itemBuilder: (context,i){
-                  return GestureDetector(
+          return WillPopScope(
+              child: SizedBox(
+                height: 300,
+                child: AlertDialog(
+                  title: const Text('Select Shop'),
+                  content: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: beatnamelist.length,
+                      itemBuilder: (context,i){
+                        return GestureDetector(
 
-                      onTap: (){
+                            onTap: (){
 
-                        Navigator.pop(contextt);
-                        if(SharedPrefClass.getDouble(latitude)==0.0){
+                              Navigator.pop(contextt);
 
-                          Fluttertoast.showToast(msg: "Please check your connection!",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              timeInSecForIosWeb: 1,
-                              backgroundColor: Colors.black,
-                              textColor: Colors.white,
-                              fontSize: 16.0);
+                              if(SharedPrefClass.getDouble(latitude)==0.0){
 
-                        }else{
+                                Fluttertoast.showToast(msg: "Please check your connection!",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: Colors.black,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
 
-                          if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
+                              }else{
 
-                            SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
-                            selectFromCamera(status,beatnamelist[i].toString(),contextt);
 
-                          }else{
+                                print("locationlatitude ${SharedPrefClass.getDouble(latitude)}  ${SharedPrefClass.getDouble(longitude)} ${double.parse(beatnamelist[i].latitude!)} ${double.parse(beatnamelist[i].longitude!)}");
 
-                            setState(() {
-                              _isLoading=false;
-                            });
+                                if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
 
-                            Fluttertoast.showToast(msg: "Too far from store!",
-                                toastLength: Toast.LENGTH_SHORT,
-                                gravity: ToastGravity.BOTTOM,
-                                timeInSecForIosWeb: 1,
-                                backgroundColor: Colors.black,
-                                textColor: Colors.white,
-                                fontSize: 16.0);
+                                  SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
+                                  selectFromCamera(status,beatnamelist[i].toString(),contextt);
 
-                          }
+                                }else{
 
-                        }
+                                  setState(() {
+                                    _isLoading=false;
+                                  });
 
-                      },
-                      child: Container(
-                        padding:EdgeInsets.all(10),
-                        child: Text("${beatnamelist[i].retailerName}"),
-                      )
-                  );
-                }
-            ),
-          );
+                                  Fluttertoast.showToast(msg: "Too far from store!",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 1,
+                                      backgroundColor: Colors.black,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
+
+                                }
+
+                              }
+
+                            },
+                            child: Container(
+                              padding:EdgeInsets.all(10),
+                              child: Text("${beatnamelist[i].retailerName}"),
+                            )
+
+                        );
+                      }
+                  ),
+                ),
+              ),
+              onWillPop: () {
+
+                setState(() {
+                  _isLoading = false;
+                });
+
+                return new Future(() => true);
+
+              });
         },
       );
 
@@ -638,6 +660,8 @@ class AttendanceState extends State<Attendance>{
 
         if(responsedData.contains("DONE")){
 
+          SharedPrefClass.setString(ATT_STATUS,status);
+
           setState(() {
             _isLoading=false;
           });
@@ -647,9 +671,6 @@ class AttendanceState extends State<Attendance>{
               MaterialPageRoute(
                   builder: (context) =>
                       HomeScreen()));
-
-          //  progress.dismiss();
-          // final currentContext = context;
 
         }
 
@@ -668,14 +689,6 @@ class AttendanceState extends State<Attendance>{
     }catch(e){
 
       print("print image $e");
-
-      // Fluttertoast.showToast(msg: "$e",
-      //     toastLength: Toast.LENGTH_SHORT,
-      //     gravity: ToastGravity.BOTTOM,
-      //     timeInSecForIosWeb: 1,
-      //     backgroundColor: Colors.black,
-      //     textColor: Colors.white,
-      //     fontSize: 16.0);
 
     }
 

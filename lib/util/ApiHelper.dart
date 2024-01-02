@@ -189,6 +189,7 @@ Future<Logindetails> getuserdetails(String endpoint) async {
     SharedPrefClass.setString(GROUP, details.group.toString());
     SharedPrefClass.setString(TARGET, details.target.toString());
     print("${details.target.toString()}");
+
   } else {
 
     throw Exception('Failed to load data');
@@ -241,7 +242,8 @@ Future<void> savepromotersale(String salesEntry,String file,String file1,String 
     var responsed = await http.Response.fromStream(response);
     final responsedData = json.decode(responsed.body);
 
-    print("${responsedData.toString()}");
+    print("response data ${responsedData.toString()}");
+
     if(responsedData.contains("DONE")){
 
       progress.dismiss();
@@ -278,7 +280,6 @@ Future<void> savepromotersale(String salesEntry,String file,String file1,String 
   }catch(e){
 
     progress.dismiss();
-    print("$e");
 
     Fluttertoast.showToast(msg: "$e",
         toastLength: Toast.LENGTH_SHORT,
@@ -290,4 +291,49 @@ Future<void> savepromotersale(String salesEntry,String file,String file1,String 
 
   }
 
+}
+
+Future<String> savelocation(jsondata) async {
+
+  Map<String, String> headers = {
+    'Content-Type': 'application/json',
+  };
+
+  var response = await http.post(Uri.parse('${IP_URL}SaveLocationsV2?locations=$jsondata'),
+      headers: headers);
+
+  try {
+
+    if (response.statusCode == 200) {
+
+      // Fluttertoast.showToast(
+      //   msg: "Successfully logged in",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   gravity: ToastGravity.BOTTOM,
+      //   timeInSecForIosWeb: 1,
+      //   backgroundColor: Colors.black,
+      //   textColor: Colors.white,
+      //   fontSize: 16.0,
+      // );
+
+
+    } else {
+
+      // Fluttertoast.showToast(
+      //   msg: "Please check your userid and password",
+      //   toastLength: Toast.LENGTH_SHORT,
+      //   gravity: ToastGravity.BOTTOM,
+      //   timeInSecForIosWeb: 1,
+      //   backgroundColor: Colors.black,
+      //   textColor: Colors.white,
+      //   fontSize: 16.0,
+      // );
+
+    }
+
+  }catch(e){
+
+  }
+  print("responsebody${response.body.toString()}");
+  return response.body.toString();
 }

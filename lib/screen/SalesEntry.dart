@@ -17,7 +17,7 @@ import 'package:promoterapp/util/DatabaseHelper.dart';
 import 'package:promoterapp/util/Networkconnectivity.dart';
 import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:promoterapp/util/functionhelper.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:geocoding/geocoding.dart' as Geocoding;
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
@@ -42,8 +42,8 @@ class SalesEntryState extends State<SalesEntry>{
   String dt = "";
   List itemlist = [], itemid=[];
   final DatabaseHelper dbManager = DatabaseHelper();
-  final connectivityResult = Connectivity().checkConnectivity();
-  NetworkConnectivity networkConnectivity = NetworkConnectivity();
+  //final connectivityResult = Connectivity().checkConnectivity();
+  //NetworkConnectivity networkConnectivity = NetworkConnectivity();
   int _batteryLevel = 0,userid = 0,shopid = 0;
   bool isturnedon = true;
   String attstatus = "";
@@ -73,6 +73,10 @@ class SalesEntryState extends State<SalesEntry>{
 
   void allbeatlist(value){
 
+    setState(() {
+      _isLoading = true;
+    });
+
     if(value.length == 0){
 
       Future.delayed(Duration(seconds: 3), () {
@@ -95,28 +99,10 @@ class SalesEntryState extends State<SalesEntry>{
 
     }else{
 
-      shopdata = value;
-
-      // for(int i=0 ;i<value.length;i++){
-      //
-      //   if(value[i].retailerName != ""){
-      //
-      //     print("length${value.length}");
-      //
-      //     setState(() {
-      //
-      //       beatnamelist.add(value[i].retailerName.toString());
-      //       beatIdlist.add(value[i].retailerID!.toInt());
-      //
-      //     });
-      //
-      //   }
-      //
-      // }
-      //
-      // beatnamelist = LinkedHashSet<String>.from(beatnamelist).toList();
-      //
-      // beatIdlist = LinkedHashSet<int>.from(beatIdlist).toList();
+        shopdata = value;
+        if(attstatus=="P"||attstatus=="NOON"){
+          showbeatt(attstatus,context,shopdata);
+        }
 
     }
 
@@ -133,8 +119,125 @@ class SalesEntryState extends State<SalesEntry>{
 
     userid  = SharedPrefClass.getInt(USER_ID);
     attstatus = SharedPrefClass.getString(ATT_STATUS);
-
     shopid = SharedPrefClass.getInt(SHOP_ID);
+
+  }
+
+  Future<void> showbeatt(String status,BuildContext contextt, List<Shops> beatnamelist) async {
+
+    print("beat length ${beatnamelist.length}");
+
+    if(beatnamelist.isEmpty){
+
+      Navigator.pop(contextt);
+
+      Fluttertoast.showToast(msg: "You don't have any beat! \n Please contact admin",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+    }else{
+
+    //  Navigator.pop(contextt);
+
+      return showDialog<void>(
+        context: contextt,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          contextt = context;
+          return WillPopScope(
+              child: SizedBox(
+                height: 300,
+                child: AlertDialog(
+
+                  title: const Text('Select Shop'),
+                  content: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: beatnamelist.length,
+                      itemBuilder: (context,i){
+                        return GestureDetector(
+
+                            onTap: (){
+
+                              Navigator.pop(contextt);
+
+                              if(SharedPrefClass.getDouble(latitude)==0.0){
+
+                                Fluttertoast.showToast(msg: "Please check your connection!",
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 1,
+                                    backgroundColor: Colors.black,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+
+                              }else{
+
+
+                                print("locationlatitude ${SharedPrefClass.getDouble(latitude)}  ${SharedPrefClass.getDouble(longitude)} ${double.parse(beatnamelist[i].latitude!)} ${double.parse(beatnamelist[i].longitude!)}");
+
+                                if(getdistance(SharedPrefClass.getDouble(latitude),SharedPrefClass.getDouble(longitude),double.parse(beatnamelist[i].latitude!),double.parse(beatnamelist[i].longitude!))){
+
+                                  SharedPrefClass.setInt(SHOP_ID,beatnamelist[i].retailerID!.toInt());
+
+                                }else{
+
+                                  setState(() {
+                                    _isLoading=false;
+                                  });
+
+                                  Fluttertoast.showToast(msg: "Too far from store!",
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 1,
+                                      backgroundColor: Colors.black,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0);
+
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (contextt) =>
+                                              HomeScreen()
+                                      )
+                                  );
+
+                                }
+
+                              }
+
+                            },
+                            child: Container(
+                              padding:EdgeInsets.all(10),
+                              child: Text("${beatnamelist[i].retailerName}"),
+                            )
+
+                        );
+                      }
+                  ),
+                ),
+              ),
+              onWillPop: ()  {
+
+              Navigator.push(
+                 context,
+                 MaterialPageRoute(
+                 builder: (contextt) =>
+                 HomeScreen()
+                )
+              );
+              return new Future(() => true);
+
+             },
+          );
+
+        },
+      );
+
+    }
 
   }
 
@@ -248,6 +351,7 @@ class SalesEntryState extends State<SalesEntry>{
             body: attstatus=="P" || attstatus=="NOON"? ProgressHUD(
                 child:Builder(
                   builder:(ctx)=>
+
                       Scaffold(
                         body: Column(
                           children: [
@@ -405,9 +509,10 @@ class SalesEntryState extends State<SalesEntry>{
                               ),
                             ),
 
-                          ],
-                        ),
+                         ],
                       ),
+                   ),
+
                 )
             ):AlertDialog(
               content:Wrap(
@@ -598,7 +703,7 @@ class SalesEntryState extends State<SalesEntry>{
 
       }catch(e){
 
-        print("$e");
+        print("exception $e");
 
       }
 
@@ -625,29 +730,39 @@ class SalesEntryState extends State<SalesEntry>{
       barrierDismissible: false,
       builder: (BuildContext context) {
         context = context;
-        return AlertDialog(
-            title: const Text('Select SKU'),
-            content: ListView.builder(
-                shrinkWrap: true,
-                itemCount: SKUlist.length,
-                itemBuilder: (context,i){
-                  return GestureDetector(
+        return StatefulBuilder(
+          builder: (context,setState){
+            return Container(
+               child: AlertDialog(
+                   title: const Text('Select SKU'),
+                   content: SizedBox(
+                       width: 400, // Adjust the width as needed
+                       height: 400,
+                       child: ListView.builder(
+                         shrinkWrap: true,
+                         itemCount: SKUlist.length,
+                         itemBuilder: (context,i){
+                           return GestureDetector(
 
-                      onTap: (){
+                               onTap: (){
 
-                        Navigator.pop(context);
-                        addwidget(SKUlist[i]['itemName'],SKUlist[i]['itemID'],SKUlist[i]['imageurl'],num.parse(SKUlist[i]['quantity']));
+                                 Navigator.pop(context);
+                                 addwidget(SKUlist[i]['itemName'],SKUlist[i]['itemID'],SKUlist[i]['imageurl'],num.parse(SKUlist[i]['quantity']));
 
-                      },
+                               },
 
-                      child: Container(
-                        padding:const EdgeInsets.all(10),
-                        child: Text("${SKUlist[i]['itemName']}"),
-                      )
+                               child: Container(
+                                 padding:const EdgeInsets.all(10),
+                                 child: Text("${SKUlist[i]['itemName']}"),
+                               )
 
-                  );
-                }
-            )
+                           );
+                         }
+                     )
+                  )
+               )
+            );
+          },
         );
       },
     );

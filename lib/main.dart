@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:promoterapp/provider/DropdownProvider.dart';
-import 'package:promoterapp/provider/PromoterStockProvider.dart';
 import 'package:promoterapp/screen/Splashscreen.dart';
 import 'dart:async';
 import 'package:promoterapp/util/Shared_pref.dart';
@@ -26,9 +25,9 @@ class MyApp extends StatelessWidget {
             create: (_)=> DropdownProvider()
         ),
 
-        ChangeNotifierProvider<PromoterStockProvider>(
-            create: (_)=> PromoterStockProvider()
-        ),
+        // ChangeNotifierProvider<PromoterStockProvider>(
+        //     create: (_)=> PromoterStockProvider()
+        // ),
 
       ],
       child:MaterialApp(

@@ -3,12 +3,17 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:promoterapp/util/ApiHelper.dart';
-import 'package:promoterapp/util/functionhelper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_progress_hud/flutter_progress_hud.dart';
+import 'package:geolocator/geolocator.dart';
 
+bool servicestatus = false;
+bool haspermission = false;
+late LocationPermission permission;
+late Position position;
 bool cstatus = false,lstatus =false;
+
 class LoginScreen extends StatefulWidget {
 
   @override
@@ -29,7 +34,7 @@ class LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    askpermission();
+
   }
 
   @override
@@ -83,9 +88,9 @@ class LoginScreenState extends State<LoginScreen> {
                                               fontWeight: FontWeight.bold,
                                               color: Color(0xFF063A06),
                                               fontSize: 30,
-                                             ),
-                                           )
-                                         )
+                                            ),
+                                            )
+                                        )
 
                                       ],
                                     ),
@@ -150,7 +155,7 @@ class LoginScreenState extends State<LoginScreen> {
                                             ),
                                           )
 
-                                         ],
+                                        ],
                                       )
                                   ),
 
@@ -159,9 +164,9 @@ class LoginScreenState extends State<LoginScreen> {
                                     onTap: () async {
 
                                       print("$cstatus $lstatus");
-                                     // if(cstatus == true && lstatus == true){
+                                      // if(cstatus == true && lstatus == true){
 
-                                        login(ctx, usercontroller.text,passcontroller.text);
+                                      login(ctx, usercontroller.text,passcontroller.text);
 
                                       // }else if(cstatus==false || lstatus == false){
                                       //
@@ -202,14 +207,14 @@ class LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                       ),
-                    ),
+                        ),
+                      ),
                 )
             )
-         ),
+        ),
         onWillPop: () async{
           return false;
-      }
+        }
     );
   }
 

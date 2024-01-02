@@ -11,7 +11,8 @@ import 'package:promoterapp/util/Shared_pref.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:promoterapp/models/Item.dart';
 import 'package:promoterapp/screen/SalesEntry.dart';
-import 'package:slide_drawer/slide_drawer.dart';
+
+import '../util/functionhelper.dart';
 
 class Dashboard extends StatefulWidget{
 
@@ -30,7 +31,7 @@ class Dashboardstate extends State<Dashboard>{
   String device="";
   String name="";
   List<Item> itemdata = [];
- //Logindetails? logindetails ;
+ //Logindetails? logindetails;
   bool _isLoading = false;
   Future<Logindetails>? userdetails;
 
@@ -39,7 +40,7 @@ class Dashboardstate extends State<Dashboard>{
     super.initState();
 
     _isLoading = true;
-  //getdevicedetails();
+    askpermission();
     name = SharedPrefClass.getString(PERSON_NAME);
     userdetails = getuserdetails('Userdetails');
     Future.delayed(const Duration(milliseconds: 600), () {
@@ -58,18 +59,6 @@ class Dashboardstate extends State<Dashboard>{
 
   }
 
-  // void getdevicedetails() async{
-  //
-  //   final info = await PackageInfo.fromPlatform();
-  //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-  //
-  //   device = androidInfo.model;
-  //   version = int.parse(info.version);
-  //   checklatestversion('checkLatestAppVersion',version,device);
-  //
-  // }
-
   Future<void> savelocaldb(value) async {
 
     itemdata = value.map<Item>((m) => Item.fromJson(Map<String, dynamic>.from(m))).toList();
@@ -81,19 +70,7 @@ class Dashboardstate extends State<Dashboard>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.white,
-          title: Text("My Dashboard",
-              style: TextStyle(color: Color(0xFF095909),
-                  fontWeight: FontWeight.w400)),
-          leading: GestureDetector(
-            onTap: () {
-              SlideDrawer.of(context)?.toggle();
-            },
-            child: Image.asset(
-              'assets/Icons/nav_menu.png', width: 104.0, height: 104.0),
-          )
-      ),
+
       body: _isLoading?const Center(
           child:CircularProgressIndicator()
       ):Column(
@@ -240,7 +217,7 @@ class Dashboardstate extends State<Dashboard>{
      );
    }
 
-   void logout(BuildContext ctx) {
+  void logout(BuildContext ctx) {
 
     showDialog(
       context: ctx,

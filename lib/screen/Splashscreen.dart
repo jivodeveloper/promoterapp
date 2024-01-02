@@ -3,7 +3,10 @@ import 'package:promoterapp/config/Common.dart';
 import 'package:promoterapp/screen/HomeScreen.dart';
 import 'package:promoterapp/screen/LoginScreen.dart';
 import 'package:swipeable_page_route/swipeable_page_route.dart';
+import 'package:permission_handler/permission_handler.dart' as Permissionhandler;
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:flutter/material.dart';
 import '../util/Shared_pref.dart';
 
@@ -15,6 +18,10 @@ class SplashScreen extends StatefulWidget{
 }
 
 class SplashScreenState extends State<SplashScreen>{
+
+  //AppUpdateInfo? _updateInfo;
+  bool _flexibleUpdateAvailable = false;
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
   @override
   void initState() {
@@ -72,5 +79,26 @@ class SplashScreenState extends State<SplashScreen>{
 
   }
 
+  void calllocationfunction() async{
+
+    var locationstatus = await Permissionhandler.Permission.locationAlways.status;
+
+    if(locationstatus.isGranted == false){
+
+      Fluttertoast.showToast(
+          msg: "Please allow location permission",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.black,
+          textColor: Colors.white,
+          fontSize: 16.0);
+
+    }else{
+      await initializeService();
+    }
+
+  }
 
 }
+
