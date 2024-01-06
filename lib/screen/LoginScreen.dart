@@ -163,22 +163,7 @@ class LoginScreenState extends State<LoginScreen> {
 
                                     onTap: () async {
 
-                                      print("$cstatus $lstatus");
-                                      // if(cstatus == true && lstatus == true){
-
                                       login(ctx, usercontroller.text,passcontroller.text);
-
-                                      // }else if(cstatus==false || lstatus == false){
-                                      //
-                                      //   Fluttertoast.showToast(msg: "Please allow permission",
-                                      //       toastLength: Toast.LENGTH_SHORT,
-                                      //       gravity: ToastGravity.BOTTOM,
-                                      //       timeInSecForIosWeb: 1,
-                                      //       backgroundColor: Colors.black,
-                                      //       textColor: Colors.white,
-                                      //       fontSize: 16.0);
-                                      //
-                                      // }
 
                                     },
 
